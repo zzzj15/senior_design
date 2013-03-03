@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <EditText
+        android:id="@+id/Username"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="21dp"
+        android:hint=" Username"
+        android:singleLine="true"
+         />
+
+    <EditText
+        android:id="@+id/Password"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/Username"
+        android:hint=" Password"
+        android:singleLine="true"
+        android:password="true" >
+    </EditText>
+
+    <EditText
+        android:id="@+id/RetypePassword"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/Password"
+        android:hint=" Retype Password"
+        android:singleLine="true"
+        android:password="true" />
+
+    <RadioGroup
+        android:id="@+id/toggleGroup"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/RetypePassword"
+        android:orientation="horizontal" >
+
+        <ToggleButton
+            android:id="@+id/Female"
+            android:layout_width="150dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="19dp"
+            android:checked="false"
+            android:text="@string/female"
+            android:textOff="@string/toggle_turn_off"
+            android:textOn="@string/toggle_turn_off" />
+
+        <ToggleButton
+            android:id="@+id/Male"
+            android:layout_width="150dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="19dp"
+            android:text="@string/male"
+            android:textOff="@string/toggle_turn_on"
+            android:textOn="@string/toggle_turn_on" />
+    </RadioGroup>
+
+    <EditText
+        android:id="@+id/Weight_ET"
+        android:layout_width="40dp"
+        android:layout_height="30dp"
+        android:layout_alignBaseline="@+id/weight"
+        android:layout_alignBottom="@+id/weight"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="44dp"
+        android:layout_marginTop="70dp"
+        android:ems="10"
+        android:hint=" kgs"
+        android:singleLine="true"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/toggleGroup"
+        android:layout_marginLeft="14dp"
+        android:layout_marginTop="70dp"
+        android:text="@string/height"/>
+
+    <TextView
+        android:id="@+id/weight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/Height_ET"
+        android:layout_marginRight="26dp"
+        android:layout_marginTop="70dp"
+        android:layout_toLeftOf="@+id/Weight_ET"
+        android:text="@string/weight"/>
+
+    <EditText
+        android:id="@+id/Height_ET"
+        android:layout_width="40dp"
+        android:layout_height="30dp"
+        android:layout_alignBaseline="@+id/height"
+        android:layout_alignBottom="@+id/height"
+        android:layout_marginLeft="29dp"
+        android:layout_marginTop="70dp"
+        android:layout_toRightOf="@+id/height"
+        android:ems="10"
+        android:hint=" cms"
+        android:singleLine="true"
+        android:textSize="12sp" >
+
+        <requestFocus />
+    </EditText>
+
+    <Button
+        android:id="@+id/Cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/Signup"
+        android:layout_alignRight="@+id/Weight_ET"
+        android:layout_marginRight="14dp"
+        android:text="@string/Cancel" />
+
+    <Button
+        android:id="@+id/Signup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="21dp"
+        android:layout_toRightOf="@+id/height"
+        android:text="@string/Signup" />
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/Cancel"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="19dp"
+        android:text="Click Here to see User Information" />
+
+     <TextView
+         android:id="@+id/TargetWeight"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignLeft="@+id/button1"
+         android:layout_centerVertical="true"
+         android:text="@string/TargetWeight"/>
+
+     <EditText
+         android:id="@+id/TargetWeight_ET"
+         android:layout_width="40dp"
+         android:layout_height="30dp"
+         android:layout_centerVertical="true"
+         android:layout_marginLeft="14dp"
+         android:layout_toRightOf="@+id/TargetWeight"
+         android:ems="10"
+         android:hint=" kgs"
+         android:singleLine="true"
+         android:textSize="12sp" />
+
+</RelativeLayout>

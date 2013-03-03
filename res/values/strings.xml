@@ -1,0 +1,29 @@
+<resources>
+
+    <string name="app_name">SeniorDesignApp</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="title_activity_calibration">CalibrationActivity</string>
+    <string name="title_activity_food_tracking">FoodTrackingActivity</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_home_page">HomePageActivity</string>
+    <string name="select_prompt">Select from below</string>
+    <string name="title_activity_new_food">New Food Item</string>
+    <string name="title_activity_tabs_view_pager_fragment">TabsViewPagerFragment</string>
+    <string name="title_activity_page_adapter">PageAdapter</string>
+    <string name="title_activity_tab1_fragment">Tab1FragmentActivity</string>
+    <string name="enter_prompt">Enter Food Name</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="height">Height</string>
+    <string name="weight">Weight</string>
+    <string name="toggle_turn_on">Male</string>
+    <string name="toggle_turn_off">Female</string>
+    <string name="Cancel">Cancel</string>
+    <string name="Signup">Signup</string>
+    <string name="TargetWeight">TargetWeight</string>
+    <string name="title_activity_profile_information">ProfileInformationActivity</string>
+
+</resources>

@@ -1,0 +1,61 @@
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:paddingLeft="5dip"
+  android:paddingRight="5dip"
+  android:paddingTop="5dip"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+  
+  
+  <RelativeLayout
+      android:id="@+id/top_view"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true">
+          <!--Put whatever view item you want here -->
+          
+         <ToggleButton
+	        android:id="@+id/toggleButton1"
+	        android:layout_alignParentRight="true"
+	        android:paddingTop="50dp"
+	        android:paddingLeft="200dp"
+	        android:layout_width="60dp"
+	        android:layout_height="20dp"
+	        android:background="@drawable/homepagetogglebtn"
+	        android:button="@null"
+	        android:textOff=""
+	        android:textOn="" />
+         <TextView android:id="@+id/toggleButtontext"
+            android:text="Accelerometer ON/OFF"
+            android:textSize="10dip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/toggleButton1"
+            android:layout_below="@+id/toggleButton1"/>
+       </RelativeLayout>
+  
+  <ImageView
+        android:id="@+id/homepagePerformanceImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/performance"
+        android:adjustViewBounds="true"/>
+   
+ <View   android:id="@+id/Divider"
+        android:layout_height="2dp"
+        android:layout_width="fill_parent"
+        android:background="#d3d3d3" />
+ <TextView android:text="Dynamic Log"
+            android:textSize="16dip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            />
+ <ExpandableListView android:id="@+id/log_list" 
+       android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+	    android:drawSelectorOnTop="false"
+	    >
+       </ExpandableListView>
+ 
+</LinearLayout>
