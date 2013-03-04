@@ -1,61 +1,117 @@
-<LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
-  android:paddingLeft="5dip"
-  android:paddingRight="5dip"
-  android:paddingTop="5dip"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
-  
-  
-  <RelativeLayout
-      android:id="@+id/top_view"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:layout_alignParentBottom="true">
-          <!--Put whatever view item you want here -->
-          
-         <ToggleButton
-	        android:id="@+id/toggleButton1"
-	        android:layout_alignParentRight="true"
-	        android:paddingTop="50dp"
-	        android:paddingLeft="200dp"
-	        android:layout_width="60dp"
-	        android:layout_height="20dp"
-	        android:background="@drawable/homepagetogglebtn"
-	        android:button="@null"
-	        android:textOff=""
-	        android:textOn="" />
-         <TextView android:id="@+id/toggleButtontext"
-            android:text="Accelerometer ON/OFF"
-            android:textSize="10dip"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:atswidget="http://schemas.android.com/apk/res/com.example.seniordesignapp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/top_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <!-- Put whatever view item you want here -->
+
+        <ToggleButton
+            android:id="@+id/toggleButton1"
+            android:layout_width="60dp"
+            android:layout_height="20dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/homepagetogglebtn"
+            android:button="@null"
+            android:paddingLeft="200dp"
+            android:paddingTop="50dp"
+            android:textOff=""
+            android:textOn="" />
+
+        <TextView
+            android:id="@+id/toggleButtontext"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/toggleButton1"
-            android:layout_below="@+id/toggleButton1"/>
-       </RelativeLayout>
-  
-  <ImageView
+            android:layout_below="@+id/toggleButton1"
+            android:text="Accelerometer ON/OFF"
+            android:textSize="10dip" />
+    </RelativeLayout>
+
+    <!--
+      ImageView
         android:id="@+id/homepagePerformanceImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/performance"
-        android:adjustViewBounds="true"/>
-   
- <View   android:id="@+id/Divider"
-        android:layout_height="2dp"
-        android:layout_width="fill_parent"
-        android:background="#d3d3d3" />
- <TextView android:text="Dynamic Log"
-            android:textSize="16dip"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            />
- <ExpandableListView android:id="@+id/log_list" 
-       android:layout_width="wrap_content"
+        android:adjustViewBounds="true"/
+    -->
+	 <RelativeLayout
+        android:id="@+id/gauge_view"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-	    android:drawSelectorOnTop="false"
-	    >
-       </ExpandableListView>
- 
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:gravity="center" >
+    <com.example.seniordesignapp.Gauge
+        android:id="@+id/meter"
+        android:layout_width="wrap_content"
+        android:layout_height="180dp"
+        android:layout_gravity="center"
+        android:paddingLeft="20dp"
+        atswidget:incrementPerLargeNotch="10"
+        atswidget:incrementPerSmallNotch="2"
+        atswidget:lowerTitle="You Performance"
+        atswidget:rangeErrorColor="0x9fff0000"
+        atswidget:rangeErrorMaxValue="100"
+        atswidget:rangeErrorMinValue="80"
+        atswidget:rangeOkColor="0x9f00ff00"
+        atswidget:rangeOkMaxValue="60"
+        atswidget:rangeOkMinValue="0"
+        atswidget:rangeWarningColor="0x9fff8800"
+        atswidget:rangeWarningMaxValue="80"
+        atswidget:rangeWarningMinValue="60"
+        atswidget:scaleCenterValue="50"
+        atswidget:scaleColor="0x9f004d0f"
+        atswidget:scaleMaxValue="100"
+        atswidget:scaleMinValue="0"
+        atswidget:showGauge="true"
+        atswidget:showHand="true"
+        atswidget:showRange="true"
+        atswidget:totalNotches="120"
+        atswidget:unitTitle=""
+        atswidget:upperTitle="" />
+	 </RelativeLayout>
+    
+    <!-- LinearLayout
+        xmlns:atswidget="http://schemas.android.com/apk/res/com.atsglobal.android.widgets"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal"
+        android:padding="0px" >
+
+        <Button
+            android:id="@+id/add"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:padding="0px"
+            android:text="Add" />
+    </LinearLayout-->
+
+    <View
+        android:id="@+id/Divider"
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:background="#d3d3d3" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Dynamic Log"
+        android:textSize="16dip" />
+
+    <ExpandableListView
+        android:id="@+id/log_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawSelectorOnTop="false" >
+    </ExpandableListView>
+
 </LinearLayout>
