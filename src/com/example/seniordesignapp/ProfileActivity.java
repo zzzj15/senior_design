@@ -17,29 +17,10 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
-import android.R.string;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
-import android.text.style.*;
-import android.text.*;
 
 
 public class ProfileActivity extends Fragment implements OnClickListener {
@@ -60,7 +41,7 @@ public class ProfileActivity extends Fragment implements OnClickListener {
 	private TextView testingUsernameResults;
 	public static String filename = "MySharedString";
 	SharedPreferences profileData;
-	private RelativeLayout mRelativeLayout;
+	private ScrollView mRelativeLayout;
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		if (container == null) {
@@ -73,7 +54,7 @@ public class ProfileActivity extends Fragment implements OnClickListener {
             // the view hierarchy; it would just never be used.
             return null;
         }
-		 mRelativeLayout = (RelativeLayout)inflater.inflate(R.layout.activity_profile, container, false);
+		 mRelativeLayout = (ScrollView)inflater.inflate(R.layout.activity_profile, container, false);
 		
 		init();
 		profileData = getActivity().getSharedPreferences(filename, 0);

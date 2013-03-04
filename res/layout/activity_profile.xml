@@ -1,48 +1,53 @@
 <?xml version="1.0"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical" >
-
+	 <LinearLayout
+            android:id="@+id/edit_text_frame"
+            android:orientation="vertical"
+            android:paddingTop="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="150dp"
+            android:gravity="center_vertical"
+            android:baselineAligned="false" >
     <EditText
         android:id="@+id/Username"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="21dp"
-        android:hint=" Username"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username"
         android:singleLine="true"
-         />
-
+        android:layout_weight = "1">
+        <requestFocus/>
+       </EditText>
     <EditText
         android:id="@+id/Password"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/Username"
-        android:hint=" Password"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:layout_weight = "1"
         android:singleLine="true"
-        android:password="true" >
-    </EditText>
-
+        android:password="true" />
     <EditText
         android:id="@+id/RetypePassword"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/Password"
-        android:hint=" Retype Password"
+        android:layout_height="wrap_content"
+        android:hint="Retype Password"
         android:singleLine="true"
-        android:password="true" />
-
+        android:password="true"
+        android:layout_weight = "1" />
+	</LinearLayout>
     <RadioGroup
         android:id="@+id/toggleGroup"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/RetypePassword"
+        android:layout_below="@+id/edit_text_frame"
         android:orientation="horizontal" >
 
         <ToggleButton
@@ -65,103 +70,91 @@
             android:textOff="@string/toggle_turn_on"
             android:textOn="@string/toggle_turn_on" />
     </RadioGroup>
-
-    <EditText
-        android:id="@+id/Weight_ET"
-        android:layout_width="40dp"
-        android:layout_height="30dp"
-        android:layout_alignBaseline="@+id/weight"
-        android:layout_alignBottom="@+id/weight"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="44dp"
-        android:layout_marginTop="70dp"
-        android:ems="10"
-        android:hint=" kgs"
-        android:singleLine="true"
-        android:textSize="12sp" />
-
-    <TextView
-        android:id="@+id/height"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/toggleGroup"
-        android:layout_marginLeft="14dp"
-        android:layout_marginTop="70dp"
-        android:text="@string/height"/>
-
-    <TextView
-        android:id="@+id/weight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/Height_ET"
-        android:layout_marginRight="26dp"
-        android:layout_marginTop="70dp"
-        android:layout_toLeftOf="@+id/Weight_ET"
-        android:text="@string/weight"/>
-
-    <EditText
-        android:id="@+id/Height_ET"
-        android:layout_width="40dp"
-        android:layout_height="30dp"
-        android:layout_alignBaseline="@+id/height"
-        android:layout_alignBottom="@+id/height"
-        android:layout_marginLeft="29dp"
-        android:layout_marginTop="70dp"
-        android:layout_toRightOf="@+id/height"
-        android:ems="10"
-        android:hint=" cms"
-        android:singleLine="true"
-        android:textSize="12sp" >
-
-        <requestFocus />
-    </EditText>
-
-    <Button
-        android:id="@+id/Cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/Signup"
-        android:layout_alignRight="@+id/Weight_ET"
-        android:layout_marginRight="14dp"
-        android:text="@string/Cancel" />
-
-    <Button
-        android:id="@+id/Signup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="21dp"
-        android:layout_toRightOf="@+id/height"
-        android:text="@string/Signup" />
-
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/Cancel"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="19dp"
-        android:text="Click Here to see User Information" />
-
-     <TextView
+	 <TextView
          android:id="@+id/TargetWeight"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
-         android:layout_alignLeft="@+id/button1"
-         android:layout_centerVertical="true"
+         android:paddingTop="20dp"
+         android:paddingLeft="5dp"
+         android:layout_below="@+id/toggleGroup"
          android:text="@string/TargetWeight"/>
 
      <EditText
          android:id="@+id/TargetWeight_ET"
          android:layout_width="40dp"
          android:layout_height="30dp"
-         android:layout_centerVertical="true"
          android:layout_marginLeft="14dp"
+         android:layout_below="@+id/toggleGroup"
          android:layout_toRightOf="@+id/TargetWeight"
+         android:layout_alignBaseline="@+id/TargetWeight"
          android:ems="10"
          android:hint=" kgs"
          android:singleLine="true"
          android:textSize="12sp" />
+    <TextView
+        android:id="@+id/height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:paddingLeft="5dp"
+        android:layout_alignBaseline="@+id/weight"
+        android:text="@string/height"/>
+    <EditText
+        android:id="@+id/Height_ET"
+        android:layout_width="50dp"
+        android:layout_height="30dp"
+        android:paddingLeft="20dp"
+        android:layout_toRightOf="@+id/height"
+        android:layout_alignBaseline="@+id/weight"
+        android:ems="10"
+        android:hint=" cms"
+        android:singleLine="true"
+        android:textSize="12sp" />
+    <TextView
+        android:id="@+id/weight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/TargetWeight"
+        android:layout_toRightOf="@+id/Height_ET"
+        android:paddingTop="20dp"
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp"
+        android:text="@string/weight"/>
+    <EditText
+        android:id="@+id/Weight_ET"
+        android:layout_width="50dp"
+        android:layout_height="30dp"
+        android:layout_alignBaseline="@+id/weight"
+        android:layout_toRightOf="@+id/weight"
+        android:paddingLeft="20dp"
+        android:ems="10"
+        android:hint=" kgs"
+        android:singleLine="true"
+        android:textSize="12sp" />
+	 <Button
+        android:id="@+id/button1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/weight"
+        android:text="Click Here to View User Information" />
+    <Button
+        android:id="@+id/Cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingRight="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/button1"
+        android:text="@string/Cancel" />
+
+    <Button
+        android:id="@+id/Signup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/button1"
+        android:layout_toLeftOf="@+id/Cancel"
+        android:text="@string/Signup" />
 
 </RelativeLayout>
+</ScrollView>
