@@ -40,7 +40,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class FoodTrackingActivity extends Fragment implements AdapterView.OnItemSelectedListener,TextWatcher{
+public class FoodTrackingFragment extends Fragment implements AdapterView.OnItemSelectedListener,TextWatcher{
 	private static String TAG = "FoodTrackingActivity";
 	private Spinner spin_amount,freq_choice;
 	//private AutoCompleteTextView itemAutoComplete_2,itemAutoComplete_3;
@@ -383,7 +383,7 @@ public class FoodTrackingActivity extends Fragment implements AdapterView.OnItem
             // the view hierarchy; it would just never be used.
             return null;
         }
-			ScrollView mlinearLayout = (ScrollView)inflater.inflate(R.layout.activity_food_tracking, container, false);
+			ScrollView mlinearLayout = (ScrollView)inflater.inflate(R.layout.fragment_food_tracking, container, false);
 			/*Generate Food Data*/
 	    	generateData();
 	    	/*Initialize Location manager*/
@@ -443,7 +443,7 @@ public class FoodTrackingActivity extends Fragment implements AdapterView.OnItem
 	            public void onClick(View v) {
 	                // Perform action on click
 	            	
-	            	Intent intent = new Intent(FoodTrackingActivity.this.getActivity(),NewFoodActivity.class);
+	            	Intent intent = new Intent(FoodTrackingFragment.this.getActivity(),NewFoodActivity.class);
 	    	        startActivity(intent); 
 	            }
 	        });

@@ -17,7 +17,7 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class HomePageActivity extends Fragment{
+public class HomePageFragment extends Fragment{
 	
 	ExpandableListView lv;
 	ToggleButton tButton;
@@ -106,7 +106,7 @@ public class HomePageActivity extends Fragment{
         AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 64);
 
-        TextView textView = new TextView(HomePageActivity.this.getActivity());
+        TextView textView = new TextView(HomePageFragment.this.getActivity());
         textView.setLayoutParams(lp);
         // Center the text vertically
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
@@ -182,7 +182,7 @@ public class HomePageActivity extends Fragment{
                 // the view hierarchy; it would just never be used.
                 return null;
             }
-    		LinearLayout mlinearLayout = (LinearLayout)inflater.inflate(R.layout.activity_home_page, container, false);
+    		LinearLayout mlinearLayout = (LinearLayout)inflater.inflate(R.layout.fragment_home_page, container, false);
     	
     		tButton = (ToggleButton) mlinearLayout.findViewById(R.id.toggleButton1);
             
