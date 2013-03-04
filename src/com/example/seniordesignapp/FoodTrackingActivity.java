@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NavUtils;
-import android.support.v4.widget.ResourceCursorAdapter;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -30,19 +29,20 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 public class FoodTrackingActivity extends Fragment implements AdapterView.OnItemSelectedListener,TextWatcher{
 	private static String TAG = "FoodTrackingActivity";
-	private Spinner spin_amount;
+	private Spinner spin_amount,freq_choice;
 	//private AutoCompleteTextView itemAutoComplete_2,itemAutoComplete_3;
 	private String[] foodItem;
 	private ImageButton mbtSpeak,mbtSearch;
@@ -92,13 +92,6 @@ public class FoodTrackingActivity extends Fragment implements AdapterView.OnItem
 		/*Initialize food database*/
     	mDbHelper = new DatabaseHelper(getActivity());
     	mDb = mDbHelper.getWritableDatabase();
-    	
-//		breakfastItems = new String[] {"Select Item","Pancakes","Donuts","Waffle","Porridge","Bagel"};
-//		lunchItems = new String[] {"Select Item","Hamburger","Pasta","Chicken Lo Mein"};
-//		dinnerItems = new String[] {"Select Item","Salad","Beef Chow Fun","Green Curry"};
-//		snackItems = new String[] {"Select Item","Potato Chips","Jelly Beans"};
-//		foodItem=concat(concat(concat(breakfastItems, lunchItems),dinnerItems),snackItems);
-		
 		foodItem=getFoodItemList();
 		columns = new String[]{
 				mDbHelper.foodItem
@@ -108,15 +101,6 @@ public class FoodTrackingActivity extends Fragment implements AdapterView.OnItem
 		};
 		
 	}
-	
-//	String[] concat(String[] A, String[] B) {
-//		   int aLen = A.length;
-//		   int bLen = B.length;
-//		   String[] C= new String[aLen+bLen];
-//		   System.arraycopy(A, 0, C, 0, aLen);
-//		   System.arraycopy(B, 0, C, aLen, bLen);
-//		   return C;
-//	}
 	String[] getFoodItemList(){
 		Cursor crs = mDb.rawQuery("SELECT food_name FROM food", null);
 		String[] array = new String[crs.getCount()];
@@ -135,6 +119,30 @@ public class FoodTrackingActivity extends Fragment implements AdapterView.OnItem
 					android.R.layout.simple_spinner_item, new String[] {" ","1","2","3","4","5","6","7","8","9","10"});
 		aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spin_amount.setAdapter(aa);
+	}
+	private void initializeFrequentSpinner(){
+		ArrayList<String> sData = new ArrayList<String>();
+		sData.add("Or Select from Frequent Choices Below");
+		//String sql = "select food_name from FoodGPS where food_name NOT NULL";
+		String sql = "SELECT food_name, COUNT(*)"
+					+ " FROM FoodGPS WHERE food_name NOT NULL"
+					+" GROUP BY food_name"
+					+" ORDER BY COUNT(*) DESC"
+					+" LIMIT 5";
+		Cursor crs = mDb.rawQuery(sql, null);
+		
+		if(crs.getCount()>0){ //now it is taking the first match WIP fix later
+			crs.moveToFirst();
+			sData.add(crs.getString(crs.getColumnIndex("food_name")));
+				while (!crs.isLast()) {
+					crs.moveToNext();
+				    String Name = crs.getString(crs.getColumnIndex("food_name"));
+				    sData.add(Name);
+				    Log.d(TAG,Name);
+				}
+		}
+		freq_choice.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, sData));
+		
 	}
 
 	public boolean checkVoiceRecognition() {
@@ -352,12 +360,13 @@ public class FoodTrackingActivity extends Fragment implements AdapterView.OnItem
 //	}
 //		getActivity().runOnUiThread(new MyLocThread());
 	}
-	public  void updateFoodGPSDatabase(Double lon,Double lat){
+	public  void updateFoodGPSDatabase(String fName,Double lon,Double lat){
 		
 		ContentValues value=new ContentValues();
+		value.put("food_name", fName);
 		value.put("latitude", lat.toString());
 		value.put("longitude", lon.toString());
-		Log.d(TAG, "INSERTING into foodgps latitude"+lat+"longitude"+lon);
+		Log.d(TAG, "INSERTING into FoodGPS latitude "+lat+"longitude"+lon + "food name "+ fName);
 		mDb.insert("FoodGPS",null,value);
         
     }
@@ -374,7 +383,7 @@ public class FoodTrackingActivity extends Fragment implements AdapterView.OnItem
             // the view hierarchy; it would just never be used.
             return null;
         }
-			LinearLayout mlinearLayout = (LinearLayout)inflater.inflate(R.layout.activity_food_tracking, container, false);
+			ScrollView mlinearLayout = (ScrollView)inflater.inflate(R.layout.activity_food_tracking, container, false);
 			/*Generate Food Data*/
 	    	generateData();
 	    	/*Initialize Location manager*/
@@ -438,7 +447,25 @@ public class FoodTrackingActivity extends Fragment implements AdapterView.OnItem
 	    	        startActivity(intent); 
 	            }
 	        });
-	      
+	        /*Frequent Choice Spinner*/
+	        freq_choice = (Spinner) mlinearLayout.findViewById(R.id.frequentSpinner);
+	        initializeFrequentSpinner();
+	        freq_choice.setOnItemSelectedListener(new OnItemSelectedListener() {
+	        	@Override
+	        	public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+	        	    // your code here
+	        		if(position>0){
+	        		ArrayList<String> sData = new ArrayList<String>();
+	        		String temp = freq_choice.getItemAtPosition(position).toString();
+				    sData.add(temp);
+				    mlv.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_single_choice, sData));
+	        		}
+	        	}
+	        	@Override
+	        	public void onNothingSelected(AdapterView<?> parentView) {
+	        	    // your code here
+	        	}
+	        });
 	        mbtConfirm = (Button) mlinearLayout.findViewById(R.id.confirmbutton);
 	        //mbtConfirm.setEnabled(false);
 	        mbtConfirm.setOnClickListener(new View.OnClickListener() {
@@ -467,20 +494,22 @@ public class FoodTrackingActivity extends Fragment implements AdapterView.OnItem
 	            	 // Register the listener with the Location Manager to receive location updates
 	            	  //requestGPSupdate();
 	            	  //updateFoodGPSDatabase(lon,lat);
-	            	  updateFoodGPSDatabase(5.33,5.33);
-	            	  //remove listener
-	            	//locationManager.removeUpdates (locationListener);
-	            	  
-//	            	  Cursor mCursor = mDb.rawQuery("SELECT * FROM FoodGPS;", null);
-//	            	  mCursor.moveToFirst();
-//	            	  while(!mCursor.isLast()){
-//	            		  Log.d("QUERY",mCursor.getString(1));
-//	            		  mCursor.moveToNext();
-//	            	  }
+	        
+	            	  //for testing
+	            	  lon = 5.2;
+	            	  lat = 5.2;
 	            	  /* Get the position of user's selection*/
 	            	  int pos = mlv.getCheckedItemPosition();
-	            	  //  showToastMessage("positions is "+ mlv.getCheckedItemPosition());
-	            
+	            	  int spinner_pos = freq_choice.getSelectedItemPosition();
+	            	  if(pos>=0)
+	            		  updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat);
+	            	  else if(spinner_pos>0){
+	            		  updateFoodGPSDatabase(freq_choice.getItemAtPosition(spinner_pos).toString(),lon,lat);
+	            	  }
+	            	  
+	            	  //remove listener
+	            	//locationManager.removeUpdates (locationListener);
+	            	 
 	            }
 	        });
 	        return mlinearLayout;

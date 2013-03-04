@@ -23,8 +23,8 @@ public class CalibrationActivity extends Fragment {
 			public void onClick(View arg0) {
 //			   Toast.makeText(CalibrationActivity.this,
 //				"running button is clicked!", Toast.LENGTH_SHORT).show();
-				mc = new MyCount(30000, 1000);  
-		        mc.start();
+//				mc = new MyCount(30000, 1000);  
+//		        mc.start();
 			}
  
 		});
@@ -34,8 +34,8 @@ public class CalibrationActivity extends Fragment {
 			public void onClick(View arg0) {
 //			   Toast.makeText(CalibrationActivity.this,
 //				"walking button is clicked!", Toast.LENGTH_SHORT).show();
-				mc = new MyCount(30000, 1000);  
-		        mc.start();
+//				mc = new MyCount(30000, 1000);  
+//		        mc.start();
 			}
  
 		});
@@ -58,7 +58,7 @@ public class CalibrationActivity extends Fragment {
         }    
 		@Override     
         public void onTick(long millisUntilFinished) {
-			Toast.makeText(CalibrationActivity.this.getActivity(), millisUntilFinished / 1000 + "", Toast.LENGTH_LONG).show();
+			//Toast.makeText(CalibrationActivity.this.getActivity(), millisUntilFinished / 1000 + "", Toast.LENGTH_LONG).show();
 		}
     	
     }

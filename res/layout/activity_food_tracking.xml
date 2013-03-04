@@ -16,7 +16,11 @@
 ** limitations under the License.
 */
 -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/search_bar"
@@ -24,7 +28,6 @@
     android:layout_height="fill_parent"
     android:paddingLeft="5dip"
     android:paddingRight="5dip"
-    android:paddingTop="5dip"
     android:paddingBottom="14dip"
     android:orientation="vertical" 
     android:focusable="true"
@@ -40,7 +43,6 @@
         android:orientation="vertical"
         android:paddingLeft="8dip"
         android:paddingRight="8dip"
-        android:paddingTop="6dip"
         android:paddingBottom="16dip"
         android:baselineAligned="false"
         android:addStatesFromChildren="true" >
@@ -117,7 +119,6 @@
         android:layout_width="fill_parent"
         android:layout_height="150dip"
         android:paddingLeft="0dp"
-        android:paddingTop="3dp"
         android:paddingRight="0dp"
         android:paddingBottom="3dp"
         android:layout_marginLeft="20dp"
@@ -126,19 +127,28 @@
         android:layout_marginBottom="5dp"
         android:background="@drawable/word_bg" 
        />
+    	<Spinner
+		android:id="@+id/frequentSpinner"
+		android:prompt="@string/select_prompt"
+		android:layout_width="fill_parent"
+		android:layout_height="32dp"
+		android:paddingBottom = "2dp"
+		android:layout_below="@+id/foodlist"
+		/>
     	<TextView
         android:id="@+id/quantity"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:text="                    Quantity           "
-        android:layout_below="@+id/foodlist"/>
+        android:layout_below="@+id/frequentSpinner"/>
     	<Spinner
 		android:id="@+id/spinner"
 		android:prompt="@string/select_prompt"
 		android:layout_toRightOf="@+id/quantity"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@+id/foodlist"
+		android:layout_alignBaseline="@+id/quantity"
+		android:layout_below="@+id/frequentSpinner"
 		/>
          <Button
          android:id="@+id/confirmbutton"
@@ -157,3 +167,4 @@
  	 </RelativeLayout>
  	
 </LinearLayout>
+</ScrollView>
