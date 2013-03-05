@@ -30,7 +30,7 @@ public class AccelsService extends Service implements SensorEventListener{
     
 	private SensorManager mSensorManager;
 	private Sensor mSensor;
-	private AccelsDbHelper mDbHelper;
+	private DatabaseHelper mDbHelper;
 	private SQLiteDatabase mDb;
 	
 	@Override
@@ -55,14 +55,13 @@ public class AccelsService extends Service implements SensorEventListener{
 		super.onDestroy();
 		mSensorManager.unregisterListener(AccelsService.this);
 		Log.d(DEBUG_TAG, "AccelService got Destroyed! mTransactionStatus = "+mTransactionStatus );
-		/* If the TransactionStatus is false, that is the app unexpectedly exists, 
-		 * data won't get inserted to the Database;
+		/* If the TransactionStatus is false, that is the app unexpectedly exists, data won't get inserted to the Database;
 		 */
 		mDb.beginTransaction();
 		try{			
 			if (mTransactionStatus){
 				for (SensorEvent e: sensorEvents){
-					mDb.execSQL("INSERT INTO "+ AccelsDbHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
+					mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
 							+", "+ e.values[1] + ", " + e.values[2] + ", " + System.currentTimeMillis() + " );");	
 				}
 				mDb.setTransactionSuccessful();
@@ -87,7 +86,7 @@ public class AccelsService extends Service implements SensorEventListener{
 		}
 	}
 	private void startCalibration(){
-		mDbHelper = new AccelsDbHelper(this);
+		mDbHelper = new DatabaseHelper(this);
 		mDb = mDbHelper.getWritableDatabase();
 		
 		/*Register the Sensor Listener */

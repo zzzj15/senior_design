@@ -12,7 +12,6 @@ import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -25,13 +24,12 @@ public class CalibrationActivity extends Activity{
 	private TextView mCountdownTv;
 	private Button mStartButton;
 	
-	private final int countdownPeriod = 60; //3 Minutes
+	private final int countdownPeriod = 5; //3 Minutes
 	private PowerManager mPm;
 	private PowerManager.WakeLock mWakelock;
 	private AccelsService mService;
 	private boolean mBound;
-	
-	private Intent mIntent;
+
 	private CountDownTimer mCountdown;
 	
 	private class myCountdown extends CountDownTimer{ //This counter will control the the 3-minute countdown 
@@ -41,23 +39,20 @@ public class CalibrationActivity extends Activity{
 		public void onTick(long millisUntilFinished) { //OnTick, we will update the display of the digital counter
 			int minutes = (int) millisUntilFinished / (60*1000);
 			int seconds = (int) (millisUntilFinished - minutes*60*1000)/1000;
-			if (seconds >= 10){
+			if (seconds >= 10)
 				mCountdownTv.setText(minutes+":" + seconds);	
-			}
-			else{
+			else
 				mCountdownTv.setText(minutes+":0" + seconds);
-			}
 	     }
-	     public void onFinish() { 
+	     public void onFinish() {
+	    	 Log.d(DEBUG_TAG,"Done Calibrating! With mBound = "+mBound);
 	    	//When the countdown is finished, we will set the transactionStatus to be true and thus data will be stored  
 			mCountdownTv.setText("Done!");
 			mCountdown = null;
-			Log.d(DEBUG_TAG,"Done Calibrating! With mBound = "+mBound);
 			releaseResources(true);
 			mStartButton.setEnabled(true); 
 	     }	
 	}
-	
 	
 	private ServiceConnection mConnection = new ServiceConnection() {
 		@Override
@@ -75,7 +70,7 @@ public class CalibrationActivity extends Activity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.fragment_calibration);
+		setContentView(R.layout.activity_calibration);
 		        
 		mCountdownTv = (TextView) findViewById(R.id.countdown_timer);
 		mStartButton = (Button) findViewById(R.id.start_button);
@@ -93,8 +88,8 @@ public class CalibrationActivity extends Activity{
 				} catch (Exception ex) {
 					Log.e("exception", "Acquiring WakeLock Failed");
 				}
-				mIntent = new Intent(CalibrationActivity.this, AccelsService.class);		
-				bindService(mIntent,mConnection,Context.BIND_AUTO_CREATE);
+				Intent intent = new Intent(CalibrationActivity.this, AccelsService.class);		
+				bindService(intent,mConnection,Context.BIND_AUTO_CREATE);
 				//Start to countdown 3 minutes and stop the service
 				if (mCountdown==null){
 					mCountdown = new myCountdown(1000*countdownPeriod, 1000);
@@ -127,14 +122,12 @@ public class CalibrationActivity extends Activity{
 		}
 		else{
 			finish();
-			mWakelock.release();
+			try {
+				mWakelock.release();
+            } catch (Throwable th) {
+                // ignoring this exception, probably wakeLock was already released
+            }
 		}
-	}
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_calibration, menu);
-		return true;
 	}
 	private void releaseResources(boolean transactionStatus){
 		if (mBound){// Unbind from the service

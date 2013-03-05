@@ -94,7 +94,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
     	mDb = mDbHelper.getWritableDatabase();
 		foodItem=getFoodItemList();
 		columns = new String[]{
-				mDbHelper.foodItem
+				mDbHelper.COL_FOODITEM
 		};
 		to = new int[]{
 				R.id.foodlist

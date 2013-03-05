@@ -12,40 +12,56 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper{
-	/* Food GPS Parameters */
+	private static final String DEBUG_TAG = DatabaseHelper.class.getSimpleName();
+	
 	private Context mContext;
-	private static String TAG = "DatabaseHelper";
-	private static String DB_NAME = "SeniorDesign";
-	public final String latitude="latitude";
-    public final String longitude="longitude";
-    public final String COLUMN1="ID_foodGPS";
-    public final String foodItem="food_name";
-    public final String foodCategory="food_category";
-    public final String calories="calories";
-    public final String gpsTime="GPS_time";
-    public final String FOODGPSTABLE="FoodGPS";
-    public final String CREATETB1="create table "+ FOODGPSTABLE+ "(" 
-    								+COLUMN1+ " integer primary key autoincrement,"
-    								+gpsTime+  " text,"
-    								+latitude+ " text,"
-    								+longitude +" text,"
-    								+foodItem + " text,"
-    								+foodCategory+" text,"
-    								+calories + " integer"
+	/* General DB Information */
+	private static final String DB_NAME = "SeniorDesign";
+	private static final int DB_VERSION = 1;
+	
+	/* Food GPS Parameters */
+	public final String COL_LATITUDE="latitude";
+    public final String COL_LONGITUDE="longitude";
+    public final String COL_FOODITEM="food_name";
+    public final String COL_FOODCATEGORY="food_category";
+    public final String COL_CALORIES="calories";
+    public final String COL_GPSTIME="GPS_time";
+    public final String FOODGSP_TABLE_NAME="FoodGPS";
+    public final String FOODGPS_STRING_CREATE="create table "+ FOODGSP_TABLE_NAME
+    								+ " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " 
+    								+ COL_GPSTIME +  " text,"
+    								+ COL_LATITUDE + " text,"
+    								+ COL_LONGITUDE +" text,"
+    								+ COL_FOODITEM + " text,"
+    								+ COL_FOODCATEGORY + " text,"
+    								+ COL_CALORIES + " integer"
     								+");";
     /* Food Parameters */
-	public final String table2_ID="ID_FOOD";
-    public final String GL="GL";
-    public final String GI="GI";
-    public final String serve_size = "Serve_Size";
-    public final String FOODTABLE="food";
-    public final String CREATETB2="create table "+ FOODTABLE+ "(" 
-    								+table2_ID+ " integer primary key autoincrement,"
-    								+foodItem+  " text,"
-    								+GI+ " integer not null,"
-    								+serve_size+ " text,"
-    								+GL +" integer"
+    public final String COL_GL="GL";
+    public final String COL_GI="GI";
+    public final String COL_SERVING_SIZE = "Serve_Size";
+    public final String FOOD_TABLE_NAME="food";
+    public final String FOOD_STRING_CREATE = "create table " + FOOD_TABLE_NAME 
+    								+ " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " 
+    								+ COL_FOODITEM +  " text,"
+    								+ COL_GI + " integer not null,"
+    								+ COL_SERVING_SIZE + " text,"
+    								+ COL_GL +" REAL"
     								+");";
+    /* Activity Parameters */
+	public static final String ACCELS_TABLE_NAME = "accelerations";
+	public static final String COL_X = "xAxis";
+	public static final String COL_Y = "yAxis";
+	public static final String COL_Z = "zAxis";
+	public static final String COL_TIMESTAMP = "timestamp"; //Time Stamp is in milliseconds
+	
+	public static final String ACCELS_STRING_CREATE = "CREATE TABLE " + ACCELS_TABLE_NAME 
+								+ " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " 
+								+ COL_X + " REAL, " 
+								+ COL_Y + " REAL, " 
+								+ COL_Z +" REAL, "
+								+ COL_TIMESTAMP + " REAL  );";
+	
 	public DatabaseHelper(Context context) {
 		super(context, DB_NAME,null, 1);
 		mContext=context;
@@ -53,9 +69,10 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		
-		db.execSQL(CREATETB1);
-		db.execSQL(CREATETB2);
+		db.execSQL(ACCELS_STRING_CREATE);
+		db.execSQL(FOODGPS_STRING_CREATE);
+		db.execSQL(FOOD_STRING_CREATE);
+
 		try {
 			seedDatabase(db);
 		} catch (IOException e) {
@@ -65,7 +82,10 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 	
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO Auto-generated method stub
+		db.execSQL("DROP TABLE IF EXISTS " + ACCELS_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + FOODGSP_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + FOOD_TABLE_NAME);
+		onCreate(db);
 		
 	}
 	private void seedDatabase(SQLiteDatabase mDb) throws IOException{
@@ -87,7 +107,6 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     	}
 	}
 	public Cursor fetchAllFood(SQLiteDatabase mDb) {
-		 
 		  Cursor mCursor = mDb.rawQuery("SELECT food_name FROM food;",null);
 		 
 		  if (mCursor != null) {

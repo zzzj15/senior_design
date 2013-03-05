@@ -1,5 +1,6 @@
 package com.example.seniordesignapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,23 +11,6 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 
 public class CalibrationFragment extends Fragment {
-	ImageButton runningButton,walkingButton;
-
-    public void addListenerOnButton() {
-		runningButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-			}
- 
-		});
-		walkingButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-			}
- 
-		});
-	}
-    
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		if (container == null) {
@@ -40,9 +24,21 @@ public class CalibrationFragment extends Fragment {
             return null;
         }
 		RelativeLayout mRelativeLayout = (RelativeLayout)inflater.inflate(R.layout.fragment_calibration, container, false);
-		runningButton = (ImageButton) mRelativeLayout.findViewById(R.id.calibration_running);
-		walkingButton = (ImageButton) mRelativeLayout.findViewById(R.id.calibration_walking);
-		addListenerOnButton();
+		ImageButton runningButton = (ImageButton) mRelativeLayout.findViewById(R.id.calibration_running);
+		ImageButton walkingButton = (ImageButton) mRelativeLayout.findViewById(R.id.calibration_walking);
+		runningButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+	            Intent intent = new Intent(getActivity(), CalibrationActivity.class);
+	            getActivity().startActivity(intent);
+			}
+		});
+		walkingButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+			}
+		});
+
 		return mRelativeLayout;
     }
 }

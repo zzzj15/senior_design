@@ -30,7 +30,7 @@ public class FeaturesConstructor{
 	
 	public FeaturesConstructor(Context context){
 		mContext = context;
-		mDb = new AccelsDbHelper(mContext).getWritableDatabase();
+		mDb = new DatabaseHelper(mContext).getWritableDatabase();
 	}
 	
 	private void constructHeader(){
@@ -85,8 +85,8 @@ public class FeaturesConstructor{
 			outputStream.write(buf.toString().getBytes());
 			outputStream.close();
 			/* We don't need the calibration Data */
-			mDb.execSQL("DROP TABLE " + AccelsDbHelper.ACCELS_TABLE_NAME);
-			mDb.execSQL(AccelsDbHelper.ACCELS_STRING_CREATE);
+			mDb.execSQL("DROP TABLE " + DatabaseHelper.ACCELS_TABLE_NAME);
+			mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
 		}
 		catch(IOException e){
 			e.printStackTrace();
@@ -94,7 +94,7 @@ public class FeaturesConstructor{
 	}
 	public void constructFeatures(){
 		/* Get the most recent acceleration data and construct a feature from that*/
-		Cursor mCursor = mDb.rawQuery("SELECT * FROM "+AccelsDbHelper.ACCELS_TABLE_NAME 
+		Cursor mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
 				+" ORDER BY timestamp DESC",null);
 		mCursor.moveToFirst();
 		int count = 0;
