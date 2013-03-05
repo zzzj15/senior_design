@@ -23,7 +23,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
-public class ProfileActivity extends Fragment implements OnClickListener {
+public class ProfileFragment extends Fragment implements OnClickListener {
 	private Button test;
 	private Button signup;
 	private Button cancel;
@@ -54,7 +54,7 @@ public class ProfileActivity extends Fragment implements OnClickListener {
             // the view hierarchy; it would just never be used.
             return null;
         }
-		 mRelativeLayout = (ScrollView)inflater.inflate(R.layout.activity_profile, container, false);
+		 mRelativeLayout = (ScrollView)inflater.inflate(R.layout.fragment_profile, container, false);
 		
 		init();
 		profileData = getActivity().getSharedPreferences(filename, 0);
