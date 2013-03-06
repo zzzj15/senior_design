@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
@@ -63,6 +64,12 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
     private SimpleCursorAdapter dataAdapter;
     private String[] columns;
     private int[] to;
+    
+    // Sharing GL data
+    
+    SharedPreferences GLdata;
+    public static String filename = "MySharedString";
+    String glvalue = "" ;
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -138,7 +145,6 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 					crs.moveToNext();
 				    String Name = crs.getString(crs.getColumnIndex("food_name"));
 				    sData.add(Name);
-				    Log.d(TAG,Name);
 				}
 		}
 		freq_choice.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, sData));
@@ -281,21 +287,19 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		//trim the "s" if there are any
 		//this will not be a problem for words end with 's' 
 		//because we are using % in the query
-		Log.d(TAG,"checking database"+out);
 		ArrayList<String> sData = new ArrayList<String>();
 		if(out.substring(out.length() - 1).equals("s"))
 			out=out.substring(0, out.length()-1);
-		String sql = "SELECT food_name FROM food WHERE lower(food_name) LIKE lower('%"+out+"%');";
-		Cursor crs = mDb.rawQuery(sql, null);
+		String sql = "SELECT _ID,GL,food_name FROM food WHERE lower(food_name) LIKE lower('%"+out+"%');";
+		mCursor = mDb.rawQuery(sql, null);
 		//if there is a match
-		if(crs.getCount()>0){ //now it is taking the first match WIP fix later
-			crs.moveToFirst();
-			sData.add(crs.getString(crs.getColumnIndex("food_name")));
-				while (!crs.isLast()) {
-					crs.moveToNext();
-				    String Name = crs.getString(crs.getColumnIndex("food_name"));
+		if(mCursor.getCount()>0){ //now it is taking the first match WIP fix later
+			mCursor.moveToFirst();
+			sData.add(mCursor.getString(mCursor.getColumnIndex("food_name")));
+				while (!mCursor.isLast()) {
+					mCursor.moveToNext();
+				    String Name = mCursor.getString(mCursor.getColumnIndex("food_name"));
 				    sData.add(Name);
-				    Log.d(TAG,Name);
 				}
 		}
 		else{
@@ -360,13 +364,21 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 //	}
 //		getActivity().runOnUiThread(new MyLocThread());
 	}
-	public  void updateFoodGPSDatabase(String fName,Double lon,Double lat){
+	public  void updateFoodGPSDatabase(String fName,Double lon,Double lat,int q,int gl){
 		
 		ContentValues value=new ContentValues();
+		
+//		String sql = "SELECT GL FROM food WHERE lower(food_name) LIKE lower('%"+fName+"%');";
+//		Cursor crs = mDb.rawQuery(sql, null);
+//		crs.moveToFirst();
+//		if(crs.getCount()==1)
+		
 		value.put("food_name", fName);
+		value.put("quantity", q);
+		value.put("GL", gl);
 		value.put("latitude", lat.toString());
 		value.put("longitude", lon.toString());
-		Log.d(TAG, "INSERTING into FoodGPS latitude "+lat+"longitude"+lon + "food name "+ fName);
+		Log.d(TAG, "INSERTING into FoodGPS latitude "+lat+"longitude"+lon + "food name "+ fName + "quantity " + q + "GL "+gl);
 		mDb.insert("FoodGPS",null,value);
         
     }
@@ -389,6 +401,9 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	    	/*Initialize Location manager*/
 	    	// Acquire a reference to the system Location Manager
         	locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        	
+        	/* Sharing GL data */
+        	GLdata = getActivity().getSharedPreferences(filename, 0);
         	
         	/*search bar*/
         	mEdtText = (EditText) mlinearLayout.findViewById(R.id.search_src_text);
@@ -437,6 +452,10 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	        mlv.setItemsCanFocus(false);
 		    mlv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 	        
+		    SharedPreferences.Editor editor = GLdata.edit();
+		    	  		editor.putString("TotalGL", glvalue);
+		    	  		editor.commit();
+		    
 	        /*Confirm button and new food button*/
 	        final Button newFoodBtn = (Button) mlinearLayout.findViewById(R.id.newitembutton);
 	        newFoodBtn.setOnClickListener(new View.OnClickListener() {
@@ -494,18 +513,46 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	            	 // Register the listener with the Location Manager to receive location updates
 	            	  //requestGPSupdate();
 	            	  //updateFoodGPSDatabase(lon,lat);
-	        
+	            	  
 	            	  //for testing
 	            	  lon = 5.2;
 	            	  lat = 5.2;
 	            	  /* Get the position of user's selection*/
 	            	  int pos = mlv.getCheckedItemPosition();
 	            	  int spinner_pos = freq_choice.getSelectedItemPosition();
-	            	  if(pos>=0)
-	            		  updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat);
-	            	  else if(spinner_pos>0){
-	            		  updateFoodGPSDatabase(freq_choice.getItemAtPosition(spinner_pos).toString(),lon,lat);
-	            	  }
+	            	  
+	            	ArrayList<Integer> foodIDs = new ArrayList<Integer>();
+	            	ArrayList<Integer> GLs = new ArrayList<Integer>();
+	          		//if there is a match
+	            	mCursor.moveToFirst();
+	          		if(mCursor.getCount()>0){ //now it is taking the first match WIP fix later
+	          			
+	          				while (!mCursor.isAfterLast()) {
+	          					//foodid = mCursor.getInt(mCursor.getColumnIndex("_ID"));
+	          					int foodid = mCursor.getInt(0);
+	          					int gl = mCursor.getInt(mCursor.getColumnIndex("GL"));
+	    	          			foodIDs.add(foodid);
+	    	          			GLs.add(gl);
+	    	          			mCursor.moveToNext();
+	          				}
+	          			  if(pos>=0){ //if listview selected
+	          			
+	          				//Toast.makeText(getActivity(), pos, Toast.LENGTH_LONG).show();;
+	          				  Log.d(TAG,"pos is "+pos);
+		            		  //foodIDs.get(pos); //assume array list index start at 0
+		            		  int glvalue = GLs.get(pos);
+		            		  updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,1,glvalue); //WIP quantity
+	          			  }
+		            		  else if(spinner_pos>0){ //if frequent choice selected
+		            		  //int glvalue = GLs.get(pos-1);
+		            		  //updateFoodGPSDatabase(freq_choice.getItemAtPosition(spinner_pos).toString(),lon,lat,1); //WIP quantity
+		            	  }
+	          		}
+	          		else{
+	          			showToastMessage("no result");
+	          		}
+	            	  
+	            	
 	            	  
 	            	  //remove listener
 	            	//locationManager.removeUpdates (locationListener);
