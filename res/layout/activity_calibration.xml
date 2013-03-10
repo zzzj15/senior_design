@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
@@ -8,8 +8,7 @@
         android:id="@+id/countdown_timer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="50dp"
         android:text="03:00"
         android:textColor="#00C2FF"
@@ -19,8 +18,18 @@
         android:id="@+id/start_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/countdown_timer"
-        android:layout_centerHorizontal="true"
+		android:layout_gravity="center_horizontal"
         android:layout_marginTop="25dp"
         android:text="Start" />
-</RelativeLayout>
+
+    <com.androidplot.xy.XYPlot
+	    android:id="@+id/xyz_hist_plot"
+	    android:layout_width="fill_parent"
+	    android:layout_height="0dp"
+	    android:layout_weight="1"
+	    android:layout_marginTop="10dp"
+	    android:layout_marginLeft="10dp"
+	    android:layout_marginRight="10dp"
+    	title="X/Y/Z accelerations"
+    />
+</LinearLayout>
