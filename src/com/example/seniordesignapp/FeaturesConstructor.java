@@ -1,133 +1,106 @@
 package com.example.seniordesignapp;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Instances;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
+import android.util.Log;
 
 /**
  * @author zsljulius
- * This class will handle the construction of one feature at a time and append it to 
- * the arrf file if the file already exists. but if the file doesn't exist, it will
- * generate the headers and write the file to internal storage. 
+ * This class will handle the construction of arff file if the file already exists. 
+ * but if the file doesn't exist, it will generate the headers and write the 
+ * file to internal storage. 
  */
 
+
 public class FeaturesConstructor{
+	private final String DEBUG_TAG = FeaturesConstructor.class.getSimpleName();
+	private ArrayList<Attribute>      atts;
+    private Instances       data;
+    private double[]        vals;
+
+    
 	private List<Feature> features = new ArrayList<Feature>();
 	private List<Acceleration> accelerations = new ArrayList<Acceleration>();
 	private SQLiteDatabase mDb;
 	private Context mContext;
 	private int SAMPLE_SIZE = 200;
-	
+	private final int BIN_SIZE = 10;  
+	private Cursor mCursor;
 	private FileOutputStream outputStream;
-	private String fileName = "activity_classification.arrf";
+	private String fileName = "activity_classification.arff";
 	private StringBuffer buf=new StringBuffer();
-	private boolean mExternalStorageAvailable,mExternalStorageWriteable;
 	
 	public FeaturesConstructor(Context context){
 		mContext = context;
 		mDb = new DatabaseHelper(mContext).getWritableDatabase();
 	}
-	
-	private void constructHeader(){
+	private Instances constructArff(List<Feature> features){
+		atts = new ArrayList<Attribute>();// set up attributes
 		char[] labels = {'x','y','z'};
-		buf.append("@RELATION activities\n");
-		//10 is the NUM_BIN
-		for (char e: labels){
-			buf.append("@ATTRIBUTE avg_"+e+" NUMERIC\n");
-			buf.append("@ATTRIBUTE std_"+e+" NUMERIC\n");
-			buf.append("@ATTRIBUTE avgAbsDiff_"+e+" NUMERIC\n");
-			buf.append("@ATTRIBUTE avgRlstAccel_"+e+" NUMERIC\n");
-			buf.append("@ATTRIBUTE timePeaks_"+e+" NUMERIC\n");
-			for (int i=1;i<=10;i++){
-				buf.append("@ATTRIBUTE binDist_"+e+i+" NUMERIC\n");	
+		for (char e: labels){	     // - numeric
+		atts.add(new Attribute("avg_"+e));
+		atts.add(new Attribute("std_"+e));
+		atts.add(new Attribute("avgAbsDiff_"+e));
+		atts.add(new Attribute("avgRlstAccel_"+e));
+		atts.add(new Attribute("timePeaks_"+e));
+		for (int i=1;i<=BIN_SIZE;i++){
+			atts.add(new Attribute("binDist_"+e+i));
 			}
 		}
-	}
-	/*check whether the media is available. 
-	The media might be mounted to a computer, 
-	missing, read-only, or in some other state*/
-	public void checkMediaAvailability(){
-		mExternalStorageAvailable = false;
-		mExternalStorageWriteable = false;
-		String state = Environment.getExternalStorageState();
-
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-		    // We can read and write the media
-		    mExternalStorageAvailable = mExternalStorageWriteable = true;
-		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-		    // We can only read the media
-		    mExternalStorageAvailable = true;
-		    mExternalStorageWriteable = false;
-		} else {
-		    // Something else is wrong. It may be one of many other states, but all we need
-		    //  to know is we can neither read nor write
-		    mExternalStorageAvailable = mExternalStorageWriteable = false;
+		atts.add(new Attribute("class",(ArrayList<String>) null)); // - string
+		
+		data = new Instances("activity", atts, 0);
+		
+		for (Feature feature:features){
+			vals = new double[data.numAttributes()];
+			double[] avg = feature.getAverage();
+			double[] std = feature.getStd();
+			double[] avgAbsDiff = feature.getAvgAbsDiff();
+			double avgRlstAccel = feature.getAvgRlstAccel();
+			double[] timePeaks = feature.getTimePeaks();
+			double[] binDist = feature.getBinDist();
+			for (int i=0;i<2;i++){ //There are in total x,y,z 3 datapoints
+				vals[0] = avg[i];
+				vals[1] = std[i];
+				vals[2] = avgAbsDiff[i];
+				vals[3] = avgAbsDiff[i];
+				vals[4] = avgAbsDiff[i];
+				vals[5] = avgRlstAccel;
+				vals[6] = timePeaks[i];
+				for (int j=0;j<BIN_SIZE;j++){
+					vals[7+j] = binDist[j];
+					Log.d(DEBUG_TAG,"The binDist["+j+"] = " + binDist[j]);
+				}
+			}
+			//The last attribute is the class running/walking.
+			vals[data.numAttributes()-1] = data.attribute(data.numAttributes()-1).addStringValue("running");
+			data.add(new DenseInstance(1.0, vals));
 		}
+	    return data;
 	}
 	
-	public void writeToFile(){
-		try{
-			checkMediaAvailability();
-			//File file = new File(getExternalFilesDir(null), fileName);
-			File file = mContext.getFileStreamPath(fileName);
-			if (file.exists()){
-				outputStream = mContext.openFileOutput(fileName, Context.MODE_APPEND);	
-			}
-			else{
-				constructHeader();	
-				outputStream = mContext.openFileOutput(fileName, Context.MODE_PRIVATE);
-			}
-			for (Feature feature:features){
-				double[] avg = feature.getAverage();
-				double[] std = feature.getStd();
-				double[] avgAbsDiff = feature.getAvgAbsDiff();
-				double avgRlstAccel = feature.getAvgRlstAccel();
-				double[] timePeaks = feature.getTimePeaks();
-				double[] binDist = feature.getBinDist();
-				for (int i=0;i<2;i++){ //There are in total x,y,z 3 datapoints
-					buf.append(avg[i]+",");
-					buf.append(std[i]+",");
-					buf.append(avgAbsDiff[i]+",");
-					buf.append(avgRlstAccel+",");
-					buf.append(timePeaks[i]+",");
-					for (int j=0;j<10;j++){
-						buf.append(binDist[j]+",");
-						if (i==1 && j==9){ //At last line, we want to remove comma and add linebreak
-							buf.deleteCharAt(buf.length()-1);
-							buf.append("\n");
-						}
-					}
-					
-				}	
-			}
-			outputStream.write(buf.toString().getBytes());
-			outputStream.close();
-			/* We don't need the calibration Data */
-			mDb.execSQL("DROP TABLE " + DatabaseHelper.ACCELS_TABLE_NAME);
-			mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
-	}
-	public void constructFeatures(){
-		/* Get the most recent acceleration data and construct a feature from that*/
-		Cursor mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
+	public void constructFeatures() throws IOException{
+		outputStream = mContext.openFileOutput(fileName, Context.MODE_PRIVATE);
+		
+		/* Get the just-recorded accelerations from db and construct a feature from every 200 datapoints*/
+		mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
 				+" ORDER BY timestamp DESC",null);
 		mCursor.moveToFirst();
-		int count = 0;
 		while(!mCursor.isAfterLast()){
 			accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
 					mCursor.getFloat(3),mCursor.getLong(4)));
 			mCursor.moveToNext();
-			count++;
 		}
 		mCursor.close();
 		
@@ -135,7 +108,13 @@ public class FeaturesConstructor{
 			List<Acceleration> samples = accelerations.subList(i*SAMPLE_SIZE, SAMPLE_SIZE*(i+1)-1);
 			features.add(new Feature(samples));
 		}
-		writeToFile();
+		Instances data = constructArff(features);
+		outputStream.write(data.toString().getBytes());
+		
+		/* We don't need the data for calibration*/
+		mDb.execSQL("DROP TABLE " + DatabaseHelper.ACCELS_TABLE_NAME);
+		mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
+		mDb.close();
 	}
 	
 }

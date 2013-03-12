@@ -7,6 +7,8 @@ import java.util.List;
 import org.apache.commons.math3.stat.Frequency;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import android.util.Log;
+
 /* This is an abstraction of a feature that is to be stored in our features database.
  * The statistics are calculated based on 200 readings contained within each 10-second segment. 
  * It should compute the following features:
@@ -25,6 +27,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  *
  */
 public class Feature {
+	private final String DEBUG_TAG = Feature.class.getSimpleName();
 	private final int NUM_BIN=10;
 	
 	private double[] average = new double[3];
@@ -149,8 +152,9 @@ public class Feature {
 	}
 	private void getBinDist(DescriptiveStatistics stats,Frequency f){
 		double binSize = (stats.getMax()-stats.getMin())/NUM_BIN;
+		long numElements = stats.getN();
 		for (int i=1;i<=NUM_BIN;i++){
-			binDist[i-1] =  f.getCumFreq(i*binSize);
+			binDist[i-1] =  f.getCumFreq(i*binSize)/numElements;
 		}
 	}
 	private double peakDet(List<Acceleration> accelerations,char pos, double threshold){
