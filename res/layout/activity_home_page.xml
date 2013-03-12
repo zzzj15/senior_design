@@ -42,13 +42,13 @@
         android:src="@drawable/performance"
         android:adjustViewBounds="true"/
     -->
-	 <RelativeLayout
-        android:id="@+id/gauge_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:gravity="center" >
+<!-- 	 <RelativeLayout -->
+<!--         android:id="@+id/gauge_view" -->
+<!--         android:layout_width="wrap_content" -->
+<!--         android:layout_height="wrap_content" -->
+<!--         android:paddingLeft="20dp" -->
+<!--         android:paddingRight="20dp" -->
+<!--         android:gravity="center" > -->
     <com.example.seniordesignapp.Gauge
         android:id="@+id/meter"
         android:layout_width="wrap_content"
@@ -77,7 +77,7 @@
         atswidget:totalNotches="120"
         atswidget:unitTitle=""
         atswidget:upperTitle="" />
-	 </RelativeLayout>
+<!-- 	 </RelativeLayout> -->
     
     <!-- LinearLayout
         xmlns:atswidget="http://schemas.android.com/apk/res/com.atsglobal.android.widgets"
