@@ -31,7 +31,8 @@
         <activity
             android:name=".FoodTrackingActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize"
+            />
         <activity
             android:name=".SettingsActivity"
             android:screenOrientation="portrait" />
@@ -58,5 +59,6 @@
     </application>
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

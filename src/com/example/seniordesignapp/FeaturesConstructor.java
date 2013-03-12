@@ -9,6 +9,7 @@ import java.util.List;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 
 /**
  * @author zsljulius
@@ -27,6 +28,7 @@ public class FeaturesConstructor{
 	private FileOutputStream outputStream;
 	private String fileName = "activity_classification.arrf";
 	private StringBuffer buf=new StringBuffer();
+	private boolean mExternalStorageAvailable,mExternalStorageWriteable;
 	
 	public FeaturesConstructor(Context context){
 		mContext = context;
@@ -48,9 +50,32 @@ public class FeaturesConstructor{
 			}
 		}
 	}
+	/*check whether the media is available. 
+	The media might be mounted to a computer, 
+	missing, read-only, or in some other state*/
+	public void checkMediaAvailability(){
+		mExternalStorageAvailable = false;
+		mExternalStorageWriteable = false;
+		String state = Environment.getExternalStorageState();
+
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+		    // We can read and write the media
+		    mExternalStorageAvailable = mExternalStorageWriteable = true;
+		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+		    // We can only read the media
+		    mExternalStorageAvailable = true;
+		    mExternalStorageWriteable = false;
+		} else {
+		    // Something else is wrong. It may be one of many other states, but all we need
+		    //  to know is we can neither read nor write
+		    mExternalStorageAvailable = mExternalStorageWriteable = false;
+		}
+	}
 	
 	public void writeToFile(){
 		try{
+			checkMediaAvailability();
+			//File file = new File(getExternalFilesDir(null), fileName);
 			File file = mContext.getFileStreamPath(fileName);
 			if (file.exists()){
 				outputStream = mContext.openFileOutput(fileName, Context.MODE_APPEND);	

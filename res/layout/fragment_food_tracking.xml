@@ -16,12 +16,13 @@
 ** limitations under the License.
 */
 -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- <ScrollView xmlns:android="http://schemas.android.com/apk/res/android" -->
 
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
->
+<!--     android:layout_width="fill_parent" -->
+<!--     android:layout_height="wrap_content" -->
+<!-- > -->
 <LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/search_bar"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -113,7 +114,7 @@
 <!--                android:layout_width="match_parent" -->
 <!--                android:layout_height="match_parent" -->
 <!--                android:text="No data"/> -->
-    	
+
     	<ListView android:id="@+id/foodlist"
         android:layout_width="fill_parent"
         android:layout_height="150dip"
@@ -125,12 +126,14 @@
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:background="@drawable/word_bg" 
+        android:scrollbars="vertical"
        />
     	<TextView
         android:id="@+id/quantity"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:text="                    Quantity           "
+        android:paddingTop = "10dp"
         android:layout_below="@+id/foodlist"/>
     	<Spinner
 		android:id="@+id/spinner"
@@ -138,6 +141,7 @@
 		android:layout_toRightOf="@+id/quantity"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
+		android:paddingTop = "10dp"
 		android:layout_alignBaseline="@+id/quantity"
 		android:layout_below="@+id/foodlist"
 		/>
@@ -158,4 +162,4 @@
  	 </RelativeLayout>
  	
 </LinearLayout>
-</ScrollView>
+<!-- </ScrollView> -->

@@ -7,9 +7,9 @@ import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
@@ -29,17 +29,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
+import android.content.DialogInterface;
 
 public class FoodTrackingFragment extends Fragment implements AdapterView.OnItemSelectedListener,TextWatcher{
 	private static String TAG = "FoodTrackingActivity";
@@ -47,7 +48,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	//private AutoCompleteTextView itemAutoComplete_2,itemAutoComplete_3;
 	private String[] foodItem;
 	private ImageButton mbtSpeak,mbtSearch;
-	private Button mbtConfirm;
+	private Button mbtConfirm,mbtNewItem;
 	private EditText mEdtText;
 	private ListView mlv;
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1001;
@@ -64,6 +65,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
     private String[] columns;
     private int[] to;
     private boolean isValid;
+    private static final int DIALOG_CONFIRM = 10;
     
     // Sharing GL data
     
@@ -382,6 +384,43 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		isValid=true;
 		return sData;
 	}
+	private void uponConfirm(String x,final int spinner_pos, final int pos, final int glvalue,final String fName){
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setMessage(x)
+				.setCancelable(false)
+				.setPositiveButton("No",
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								dialog.cancel();
+
+							}
+						})
+				.setNegativeButton("Yes",
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int id) {
+			            		 updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue);
+		          				 ArrayList<String> in = new ArrayList<String>();
+		          				 in.add("No Results");
+		          				 mlv.setAdapter(new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_single_choice, in));
+		          				 spin_amount.setSelection(0);
+		          				 mEdtText.setText("");
+		          				 isValid=false;
+		          				 showToastMessage("Recorded "+spinner_pos+" "+fName);
+							}
+						});
+
+		AlertDialog alert = builder.create();
+		alert.show();
+
+	}
+
+	
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -395,7 +434,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
             // the view hierarchy; it would just never be used.
             return null;
         }
-			ScrollView mlinearLayout = (ScrollView)inflater.inflate(R.layout.fragment_food_tracking, container, false);
+			LinearLayout mlinearLayout = (LinearLayout)inflater.inflate(R.layout.fragment_food_tracking, container, false);
 			/*Generate Food Data*/
 	    	generateData();
 	    	/*Initialize Location manager*/
@@ -467,7 +506,9 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	    	        startActivity(intent); 
 	            }
 	        });
+	        
 	        mbtConfirm = (Button) mlinearLayout.findViewById(R.id.confirmbutton);
+	        
 	        //mbtConfirm.setEnabled(false);
 	        mbtConfirm.setOnClickListener(new View.OnClickListener() {
 	            public void onClick(View v) {
@@ -489,7 +530,6 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	    	                  lat = loc.getLatitude();
 	    	                  gpstime = loc.getTime();
 	    	                  showToastMessage("longitude "+lon+"latitude "+lat+"time "+gpstime);
-	    	                // updateFoodGPSDatabase(lon,lat);
 	    				}
 	            	  };
 	            	  /* request location and store to database*/
@@ -517,15 +557,9 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		    	          			mCursor.moveToNext();
 		          				}
 		          			  if((pos>=0) && spinner_pos > 0){ //if listview selected
-			            		  int glvalue = GLs.get(pos);
-			            		  updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue);
-		          				  ArrayList<String> in = new ArrayList<String>();
-		          				  in.add("No Results");
 		          				  String fName = mlv.getItemAtPosition(pos).toString();
-		          				  mlv.setAdapter(new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_single_choice, in));
-		          				  spin_amount.setSelection(0);
-		          				  isValid=false;
-		          				  showToastMessage("Entered "+spinner_pos+" "+fName);
+		          				  
+		          				  uponConfirm(fName+"\n"+" Quantity: "+spinner_pos+"\n "+"Is this correct?",spinner_pos,pos,GLs.get(pos),fName);
 		          				  
 		          			  }
 		          			  else if(pos<0 && spinner_pos <= 0)
@@ -546,7 +580,8 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
             	//locationManager.removeUpdates (locationListener);
 	            	
 	        });
+	       
+
 	        return mlinearLayout;
 	}
-
 }
