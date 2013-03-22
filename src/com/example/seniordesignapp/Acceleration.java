@@ -1,7 +1,4 @@
 package com.example.seniordesignapp;
-
-import java.util.Comparator;
-
 /**
  * @author zsljulius
  * Acceleration Class contains the x, y, z accelerations and a timestamp. It is an 
