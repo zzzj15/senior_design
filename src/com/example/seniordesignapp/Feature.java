@@ -53,7 +53,7 @@ public class Feature {
 	public double[] getBinDist() {
 		return binDist;
 	}
-	private double[] binDist = new double[NUM_BIN];
+	private double[] binDist = new double[NUM_BIN*3];
 	
 	/**
 	 * Construct a feature to be stored in the database.
@@ -101,9 +101,9 @@ public class Feature {
 			fy.addValue(y[i]);
 			fz.addValue(z[i]);
 		}
-		getBinDist(statsX,fx);
-		getBinDist(statsY,fy);
-		getBinDist(statsZ,fz);
+		getBinDist(statsX,fx,0);
+		getBinDist(statsY,fy,10);
+		getBinDist(statsZ,fz,20);
 	}
 	/**
 	 * @param dataset The x,y,z dataset
@@ -150,11 +150,25 @@ public class Feature {
 		return timePeaks;
 		
 	}
-	private void getBinDist(DescriptiveStatistics stats,Frequency f){
-		double binSize = (stats.getMax()-stats.getMin())/NUM_BIN;
+	private void getBinDist(DescriptiveStatistics stats,Frequency f, int index){
+		double max = stats.getMax();
+		double min = stats.getMin();
+		double binSize = (max-min)/NUM_BIN;
 		long numElements = stats.getN();
-		for (int i=1;i<=NUM_BIN;i++){
-			binDist[i-1] =  f.getCumFreq(i*binSize)/numElements;
+		Log.d(DEBUG_TAG,"min = "+min);
+		Log.d(DEBUG_TAG,"max = "+max);
+		Log.d(DEBUG_TAG,"numElements = "+numElements);
+		for (int i=index+1;i<=NUM_BIN+index;i++){
+			double minsize = (min+(i-1)*binSize);
+			//Log.d(DEBUG_TAG,"Min+("+i+"-1)*binSize = "+minsize);
+			//Log.d(DEBUG_TAG,"Frequency "+i+" = "+f.getCumFreq(min+(i-1)*binSize));
+			if (i==index+1){
+				binDist[i-1] =  f.getCumFreq(min+(i-index)*binSize);
+			}
+			else{
+				binDist[i-1] =  f.getCumFreq(min+(i-index)*binSize)-f.getCumFreq(min+(i-index-1)*binSize);
+			}
+			//Log.d(DEBUG_TAG,"Freqency "+i+" = "+binDist[i-1]);
 		}
 	}
 	private double peakDet(List<Acceleration> accelerations,char pos, double threshold){

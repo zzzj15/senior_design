@@ -74,13 +74,11 @@ public class FeaturesConstructor{
 				vals[0] = avg[i];
 				vals[1] = std[i];
 				vals[2] = avgAbsDiff[i];
-				vals[3] = avgAbsDiff[i];
-				vals[4] = avgAbsDiff[i];
-				vals[5] = avgRlstAccel;
-				vals[6] = timePeaks[i];
-				for (int j=0;j<BIN_SIZE;j++){
-					vals[7+j] = binDist[j];
-					Log.d(DEBUG_TAG,"The binDist["+j+"] = " + binDist[j]);
+				vals[3] = avgRlstAccel;
+				vals[4] = timePeaks[i];
+				for (int j=0;j<BIN_SIZE*3;j++){
+					vals[5+j] = binDist[j];
+					//Log.d(DEBUG_TAG,"The binDist["+j+"] = " + binDist[j]);
 				}
 			}
 			//The last attribute is the class running/walking.
@@ -103,7 +101,11 @@ public class FeaturesConstructor{
 			mCursor.moveToNext();
 		}
 		mCursor.close();
-		
+		/*String debug="Sample Data";
+		for (Acceleration e:accelerations){
+			debug = debug+String.valueOf(e.getX());
+		}
+		Log.d(DEBUG_TAG,debug);*/
 		for (int i =0;i<accelerations.size()/SAMPLE_SIZE;i++){
 			List<Acceleration> samples = accelerations.subList(i*SAMPLE_SIZE, SAMPLE_SIZE*(i+1)-1);
 			features.add(new Feature(samples));
