@@ -28,17 +28,18 @@ public class CalibrationFragment extends Fragment {
 		ImageButton walkingButton = (ImageButton) mRelativeLayout.findViewById(R.id.calibration_walking);
 		runningButton.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(View arg0) {
+			public void onClick(View v) {
 	            Intent intent = new Intent(getActivity(), CalibrationActivity.class);
 	            getActivity().startActivity(intent);
 			}
 		});
 		walkingButton.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(View arg0) {
+			public void onClick(View v) {
+				Intent intent = new Intent(getActivity(), CalibrationActivity.class);
+	            getActivity().startActivity(intent);
 			}
 		});
-
 		return mRelativeLayout;
     }
 }

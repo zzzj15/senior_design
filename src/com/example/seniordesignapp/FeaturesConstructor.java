@@ -70,14 +70,20 @@ public class FeaturesConstructor{
 			double avgRlstAccel = feature.getAvgRlstAccel();
 			double[] timePeaks = feature.getTimePeaks();
 			double[] binDist = feature.getBinDist();
-			for (int i=0;i<2;i++){ //There are in total x,y,z 3 datapoints
-				vals[0] = avg[i];
-				vals[1] = std[i];
-				vals[2] = avgAbsDiff[i];
-				vals[3] = avgRlstAccel;
-				vals[4] = timePeaks[i];
+//			for (int i=0;i<2;i++){ //There are in total x,y,z 3 datapoints
+			for (int i=0;i<3;i++){ //There are in total x,y,z 3 datapoints
+				vals[i*15] = avg[i];
+				vals[i*15+1] = std[i];
+				vals[i*15+2] = avgAbsDiff[i];
+				vals[i*15+3] = avgRlstAccel;
+				vals[i*15+4] = timePeaks[i];
 				for (int j=0;j<BIN_SIZE*3;j++){
-					vals[5+j] = binDist[j];
+					if(j>=0 && j<=9)
+						vals[5+j] = binDist[j];
+					else if(j>=10 && j<=19)
+						vals[10+j] = binDist[j];
+					else
+						vals[15+j] = binDist[j];
 					//Log.d(DEBUG_TAG,"The binDist["+j+"] = " + binDist[j]);
 				}
 			}

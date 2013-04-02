@@ -45,10 +45,13 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	private Button mStartButton;
 	private CountDownTimer mCountdown;
 	
+	private boolean mIsCountdown;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_calibration);
+		mIsCountdown=false;
 		mCountdownTv = (TextView) findViewById(R.id.countdown_timer);
 		mStartButton = (Button) findViewById(R.id.start_button);
 		
@@ -58,11 +61,6 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		//Database related operations 
 		mDbHelper = new DatabaseHelper(this);
 		mDb = mDbHelper.getWritableDatabase();
-		
-		/*Register the Sensor Listener */
-		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-		mSensor = (Sensor) mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_NORMAL);
 		
         // setup x/y/z accelerations plot:
 		mXyzHistPlot = (XYPlot) findViewById(R.id.xyz_hist_plot);
@@ -85,6 +83,12 @@ public class CalibrationActivity extends Activity implements SensorEventListener
         mXyzHistPlot.getDomainLabelWidget().pack();
         mXyzHistPlot.setRangeLabel("Angle (Degs)");
         mXyzHistPlot.getRangeLabelWidget().pack();
+        
+		/*Register the Sensor Listener */
+		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+		mSensor = (Sensor) mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_NORMAL);
+		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_FASTEST);
 	}
 	@Override
 	protected void onStart(){
@@ -136,7 +140,8 @@ public class CalibrationActivity extends Activity implements SensorEventListener
         sensorEvents.add(sensorEvent);
         
         // redraw the Plots:
-        mXyzHistPlot.redraw();	
+        if(mIsCountdown)
+        	mXyzHistPlot.redraw();	
 	}
 	@Override
 	public void onAccuracyChanged(Sensor sensorEvent, int arg1) {
@@ -148,6 +153,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 			super(millisInFuture, countDownInterval);
 		}
 		public void onTick(long millisUntilFinished) { //OnTick, we will update the display of the digital counter
+			mIsCountdown = true;
 			int minutes = (int) millisUntilFinished / (60*1000);
 			int seconds = (int) (millisUntilFinished - minutes*60*1000)/1000;
 			if (seconds >= 10)
@@ -158,6 +164,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	     public void onFinish() {
 	    	//When the countdown is finished, we will set the transactionStatus to be true and thus data will be stored  
 			mCountdownTv.setText("Done!");
+			mIsCountdown=false;
 			mCountdown = null;
 			mStartButton.setEnabled(true); 
 	     }	
