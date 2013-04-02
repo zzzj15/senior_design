@@ -39,9 +39,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	private SQLiteDatabase mDb;
 	private List<SensorEvent> sensorEvents;
 	
-	private final int countdownPeriod = 60; //3 Minutes
-	private PowerManager mPm;
-	private PowerManager.WakeLock mWakelock;
+	private final int countdownPeriod = 30; //3 Minutes
 	
 	private TextView mCountdownTv;
 	private Button mStartButton;
@@ -64,7 +62,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		/*Register the Sensor Listener */
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		mSensor = (Sensor) mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_UI);
+		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_NORMAL);
 		
         // setup x/y/z accelerations plot:
 		mXyzHistPlot = (XYPlot) findViewById(R.id.xyz_hist_plot);
@@ -94,13 +92,6 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		mStartButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				try {
-					mPm = (PowerManager) getSystemService(CalibrationActivity.POWER_SERVICE);
-					mWakelock = mPm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, DEBUG_TAG);
-					mWakelock.acquire();
-				} catch (Exception ex) {
-					Log.e("exception", "Acquiring WakeLock Failed");
-				}
 				if (mCountdown==null){//Start to countdown 3 minutes and stop the service
 					mCountdown = new myCountdown(1000*countdownPeriod, 1000);
 					mCountdown.start();
@@ -168,7 +159,6 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	    	//When the countdown is finished, we will set the transactionStatus to be true and thus data will be stored  
 			mCountdownTv.setText("Done!");
 			mCountdown = null;
-			mWakelock.release();
 			mStartButton.setEnabled(true); 
 	     }	
 	}
