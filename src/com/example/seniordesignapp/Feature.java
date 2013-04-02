@@ -144,9 +144,12 @@ public class Feature {
 	 */
 	private double[] getTimePeaks(List<Acceleration> accelerations){
 		double timePeaks[] = new double[3];
-		timePeaks[0] = peakDet(accelerations,'x',0.05);
-		timePeaks[1] =peakDet(accelerations,'y',0.05);
-		timePeaks[2] =peakDet(accelerations,'z',0.05);
+//		timePeaks[0] = peakDet(accelerations,'x',0.05);
+//		timePeaks[1] =peakDet(accelerations,'y',0.05);
+//		timePeaks[2] =peakDet(accelerations,'z',0.05);
+		timePeaks[0] = peakDet(accelerations,'x',0.2);
+		timePeaks[1] =peakDet(accelerations,'y',0.2);
+		timePeaks[2] =peakDet(accelerations,'z',0.2);
 		return timePeaks;
 		
 	}
@@ -157,7 +160,7 @@ public class Feature {
 		long numElements = stats.getN();
 		Log.d(DEBUG_TAG,"min = "+min);
 		Log.d(DEBUG_TAG,"max = "+max);
-		Log.d(DEBUG_TAG,"numElements = "+numElements);
+//		Log.d(DEBUG_TAG,"numElements = "+numElements);
 		for (int i=index+1;i<=NUM_BIN+index;i++){
 			double minsize = (min+(i-1)*binSize);
 			//Log.d(DEBUG_TAG,"Min+("+i+"-1)*binSize = "+minsize);
@@ -215,9 +218,12 @@ public class Feature {
 				}
 			}
 		}
-		if (maxTab.size()<=1)
+		if (maxTab.size()<=1){
+			Log.d(DEBUG_TAG,"size is "+maxTab.size()+"!!!!!!!!!!!!!!!!!!!!");
 			return 0;
+		}
 		else{
+			Log.d(DEBUG_TAG,"size is "+maxTab.size()+"!!!!!!!!!!!!!!!!!!!!");
 			Iterator<Acceleration> iterator = maxTab.iterator();
 			Acceleration cur,prev;
 			prev = iterator.next();
@@ -227,7 +233,7 @@ public class Feature {
 				diffSum += cur.getTimestamp()-prev.getTimestamp();
 				prev = cur;
 			}
-			return diffSum/maxTab.size();
+			return (double) diffSum/maxTab.size();
 		}
 	}
 	@Override
