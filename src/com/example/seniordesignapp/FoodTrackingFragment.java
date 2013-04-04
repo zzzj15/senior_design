@@ -3,6 +3,9 @@ package com.example.seniordesignapp;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import com.example.seniordesignapp.GPSTracker;
+
 import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Context;
@@ -41,6 +44,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+
 public class FoodTrackingFragment extends Fragment implements AdapterView.OnItemSelectedListener,TextWatcher{
 	private static String TAG = "FoodTrackingActivity";
 	private Spinner spin_amount,freq_choice;
@@ -52,8 +56,11 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	private ListView mlv;
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1001;
 
-	//GPS parameters
 	
+	// GPSTracker class
+	GPSTracker gps;
+	
+	//GPS parameters
 	private LocationManager locationManager;
 	private LocationListener locationListener;
     private Double lon,lat;
@@ -490,7 +497,9 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	        mbtConfirm.setOnClickListener(new View.OnClickListener() {
 	            public void onClick(View v) {
 	            	// Define a listener that responds to location updates
-	            	locationListener = new LocationListener() {
+	            	
+	            	//showToastMessage("TEST!");
+	            	/* locationListener = new LocationListener() {
 
 	            	    public void onStatusChanged(String provider, int status, Bundle extras) {}
 
@@ -508,16 +517,37 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	    	                  showToastMessage("longitude "+lon+"latitude "+lat+"time "+gpstime);
 	    	                // updateFoodGPSDatabase(lon,lat);
 	    				}
-	            	  };
+	            	  };*/
+	            	
+					// create class object
+			        gps = new GPSTracker(getActivity());
+
+					// check if GPS enabled		
+			        if(gps.canGetLocation()){
+			        	
+			        	double latitude = gps.getLatitude();
+			        	double longitude = gps.getLongitude();
+			        	
+			        	// \n is for new line
+			        	Toast.makeText(getActivity(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();	
+			        }else{
+			        	// can't get location
+			        	// GPS or Network is not enabled
+			        	// Ask user to enable GPS/network in settings
+			        	gps.showSettingsAlert();
+			        }
+			        
+			        
+			        
 	            	  /* request location and store to database*/
 	            	 // Register the listener with the Location Manager to receive location updates
 	            	  //requestGPSupdate();
 	            	  //updateFoodGPSDatabase(lon,lat);
-	            	  
+	            	  /* 
 	            	  //for testing
 	            	  lon = 5.2;
 	            	  lat = 5.2;
-	            	  /* Get the position of user's selection*/
+	            	  //Get the position of user's selection
 	            	  int pos = mlv.getCheckedItemPosition();
 	            	  int spinner_pos = freq_choice.getSelectedItemPosition();
 	            	  
@@ -552,7 +582,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	          			showToastMessage("no result");
 	          		}
 	            	  
-	            	
+	            	*/
 	            	  
 	            	  //remove listener
 	            	//locationManager.removeUpdates (locationListener);
