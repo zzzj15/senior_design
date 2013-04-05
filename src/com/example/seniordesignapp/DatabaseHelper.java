@@ -64,7 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 								+ COL_X + " REAL, " 
 								+ COL_Y + " REAL, " 
 								+ COL_Z +" REAL, "
-								+ COL_TIMESTAMP + " REAL  );";
+								+ COL_TIMESTAMP + " REAL);";
 	
 	public DatabaseHelper(Context context) {
 		super(context, DB_NAME,null, 1);

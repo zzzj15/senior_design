@@ -147,9 +147,9 @@ public class Feature {
 //		timePeaks[0] = peakDet(accelerations,'x',0.05);
 //		timePeaks[1] =peakDet(accelerations,'y',0.05);
 //		timePeaks[2] =peakDet(accelerations,'z',0.05);
-		timePeaks[0] = peakDet(accelerations,'x',0.2);
-		timePeaks[1] =peakDet(accelerations,'y',0.2);
-		timePeaks[2] =peakDet(accelerations,'z',0.2);
+		timePeaks[0] = peakDet(accelerations,'x',0.3);
+		timePeaks[1] =peakDet(accelerations,'y',0.3);
+		timePeaks[2] =peakDet(accelerations,'z',0.3);
 		return timePeaks;
 		
 	}
@@ -200,6 +200,7 @@ public class Feature {
 					mx = 0;
 					break;
 			}
+//			Log.d(DEBUG_TAG,"mx is "+mx);
 			if (vx > mx){
 				mx = vx;
 				maxAccel = v;
@@ -207,6 +208,7 @@ public class Feature {
 			if (lookForMax){
 				if (vx < mx-threshold){
 					maxTab.add(maxAccel);
+					Log.d(DEBUG_TAG,"max accel is x" + maxAccel.getX()+"max accel y is"+maxAccel.getY()+" max accel z is"+maxAccel.getZ());
 					mn = vx;
 					lookForMax = false;
 				}
@@ -224,16 +226,35 @@ public class Feature {
 		}
 		else{
 			Log.d(DEBUG_TAG,"size is "+maxTab.size()+"!!!!!!!!!!!!!!!!!!!!");
-			Iterator<Acceleration> iterator = maxTab.iterator();
-			Acceleration cur,prev;
-			prev = iterator.next();
-			long diffSum = 0;
-			while (iterator.hasNext()) {
-				cur = iterator.next();
-				diffSum += cur.getTimestamp()-prev.getTimestamp();
+			
+			long diffSum=0;
+			int count=0;
+			Acceleration prev=maxTab.get(0);
+			for(Acceleration cur : maxTab){
+				diffSum +=cur.getTimestamp()-prev.getTimestamp();
+				count++;
+//				Log.d(DEBUG_TAG,"time stamp is "+cur.getTimestamp()+" count "+count+" prev "+prev.getTimestamp());
+//				Log.d(DEBUG_TAG,"cur x is "+cur.getX()+"prev x is "+prev.getX());
 				prev = cur;
 			}
-			return (double) diffSum/maxTab.size();
+//			
+//			Iterator<Acceleration> iterator = maxTab.iterator();
+//			Acceleration cur,prev;
+//			prev = iterator.next();
+//			long diffSum = 0;
+//			
+//			int count=0;
+//			
+//			while (iterator.hasNext()) {
+//				cur = iterator.next();
+//				diffSum += cur.getTimestamp()-prev.getTimestamp();
+//				
+//				Log.d(DEBUG_TAG,"time stamp is "+cur.getTimestamp()+" count "+count+" prev "+prev.getTimestamp());
+//				Log.d(DEBUG_TAG,"cur x is "+cur.getX()+"prev x is "+prev.getX());
+//				count++;
+//				prev = cur;
+//			}
+			return (double) -diffSum/maxTab.size(); //- because we are analyzing the data backwards.
 		}
 	}
 	@Override

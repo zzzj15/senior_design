@@ -113,8 +113,11 @@ public class CalibrationActivity extends Activity implements SensorEventListener
         mDb.beginTransaction();
 		try{			
 			for (SensorEvent e: sensorEvents){
+//				mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
+//						+", "+ e.values[1] + ", " + e.values[2] + ", " + System.currentTimeMillis() + " );");	
+				long curTime = System.currentTimeMillis();
 				mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
-						+", "+ e.values[1] + ", " + e.values[2] + ", " + System.currentTimeMillis() + " );");	
+						+", "+ e.values[1] + ", " + e.values[2] + ", " + curTime+ " );");
 			}
 			mDb.setTransactionSuccessful();
 		}
@@ -126,7 +129,8 @@ public class CalibrationActivity extends Activity implements SensorEventListener
     }
 	@Override
 	public synchronized void onSensorChanged(SensorEvent sensorEvent) {        // update instantaneous data:
-        // get rid the oldest sample in history:
+		if(mIsCountdown){
+		// get rid the oldest sample in history:
         if (mXSeries.size() > HISTORY_SIZE) {
         	mXSeries.removeFirst();
         	mYSeries.removeFirst();
@@ -140,8 +144,9 @@ public class CalibrationActivity extends Activity implements SensorEventListener
         sensorEvents.add(sensorEvent);
         
         // redraw the Plots:
-        if(mIsCountdown)
+        
         	mXyzHistPlot.redraw();	
+		}
 	}
 	@Override
 	public void onAccuracyChanged(Sensor sensorEvent, int arg1) {

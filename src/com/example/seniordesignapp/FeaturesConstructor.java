@@ -1,10 +1,9 @@
 package com.example.seniordesignapp;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import weka.core.Attribute;
@@ -101,9 +100,18 @@ public class FeaturesConstructor{
 		mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
 				+" ORDER BY timestamp DESC",null);
 		mCursor.moveToFirst();
+		
+		Hashtable<Long, Float> ht = new Hashtable<Long, Float>();	
+		
 		while(!mCursor.isAfterLast()){
+			
+			long timeSt = mCursor.getLong(4);
+			if(!ht.containsKey(timeSt)){
+			ht.put(timeSt, mCursor.getFloat(1));
 			accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
-					mCursor.getFloat(3),mCursor.getLong(4)));
+					mCursor.getFloat(3),timeSt));
+			Log.d(DEBUG_TAG,"time is "+timeSt+"x is "+mCursor.getFloat(1)+" "+mCursor.getFloat(2)+" "+mCursor.getFloat(3));
+			}
 			mCursor.moveToNext();
 		}
 		mCursor.close();
