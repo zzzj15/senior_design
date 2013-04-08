@@ -4,11 +4,105 @@
     android:layout_height="match_parent" >
 
     <TextView
+        android:id="@+id/ManualFoodEntry"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="@string/hello_world"
-        tools:context=".NewFoodActivity" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:text="Food Entry :" 
+       
+        android:textSize="20sp"/>
 
+    <EditText
+        android:id="@+id/EditManualFoodEntry"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Food Name"
+        android:layout_toRightOf="@+id/ManualFoodEntry"
+        android:layout_marginTop="10dp" 
+        android:singleLine="true"/>
+
+    <Button
+        android:id="@+id/NewEntryBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/GlycemicValue"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="18dp"
+        android:text="Back" />
+
+    <EditText
+        android:id="@+id/EditGLValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/EditGIValue"
+        android:layout_toRightOf="@+id/GlycemicValue"
+        android:ems="10"
+        android:hint="GL Value"
+        android:inputType="number"
+        android:singleLine="true" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/EditServeSizeValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/EditGLValue"
+        android:ems="10"
+        android:hint="Serve Size"
+        android:inputType="number"
+        android:singleLine="true" />
+
+    <TextView
+        android:id="@+id/GlycemicValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/EditManualFoodEntry"
+        android:layout_marginTop="17dp"
+        android:text="Glycemic Index :"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/EditGIValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/GlycemicValue"
+        android:layout_alignParentRight="true"
+        android:ems="10"
+        android:hint="GI Value"
+        android:layout_toRightOf="@+id/GlycemicValue"
+        android:inputType="number"
+        android:singleLine="true" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/EditGLValue"
+        android:textSize="20sp"
+        android:text="Glycemic Load :" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/EditServeSizeValue"
+        android:text="Quantity :"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/NewEntryConfirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="36dp"
+        android:text="Confirm" />
+    
 </RelativeLayout>
