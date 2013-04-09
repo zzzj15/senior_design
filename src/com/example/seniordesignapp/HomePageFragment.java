@@ -9,6 +9,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.widget.AbsListView;
@@ -26,7 +27,7 @@ public class HomePageFragment extends Fragment {
 	ExpandableListView lv;
 	ToggleButton tButton;
 
-	class MyExpandableListAdapter extends BaseExpandableListAdapter  {
+	class MyExpandableListAdapter extends BaseExpandableListAdapter implements ExpandableListView.OnChildClickListener{
 
 		private String[] groups = setGroupData();
 		private String[][] children = setChildGroupData();
@@ -44,6 +45,9 @@ public class HomePageFragment extends Fragment {
 			return stockArr;
 		}
 
+		
+		
+		
 		public String[][] setChildGroupData() { // WIP - hard coding
 		// /**
 		// * Add Data For activity1
@@ -172,6 +176,17 @@ public class HomePageFragment extends Fragment {
 			return true;
 		}
 
+
+
+
+		@Override
+		public boolean onChildClick(ExpandableListView parent, View v,
+				int groupPosition, int childPosition, long id) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+
 	}
 
 	Gauge meter; 
@@ -222,6 +237,17 @@ public class HomePageFragment extends Fragment {
 		lv = (ExpandableListView) mlinearLayout.findViewById(R.id.log_list);
 		MyExpandableListAdapter expandableAdapter = new MyExpandableListAdapter();
 		lv.setAdapter(expandableAdapter);
+		lv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+			
+			@Override
+			public boolean onChildClick(ExpandableListView parent, View v,
+					int groupPosition, int childPosition, long id) {
+				showToastMessage("Work! + ParentID =" + groupPosition + " ChildID = " + childPosition );
+				return false;
+			}
+		});
+			
+
 		return mlinearLayout;
 	}
 
@@ -247,5 +273,7 @@ public class HomePageFragment extends Fragment {
 	void showToastMessage(String message) {
 		  Toast.makeText(this.getActivity(), message, Toast.LENGTH_SHORT).show();
 	}
-	 
+
 }
+	 
+
