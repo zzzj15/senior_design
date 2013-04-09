@@ -30,6 +30,7 @@ public class CalibrationFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 	            Intent intent = new Intent(getActivity(), CalibrationActivity.class);
+	            intent.putExtra("mode", "running");
 	            getActivity().startActivity(intent);
 			}
 		});
@@ -37,6 +38,7 @@ public class CalibrationFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(getActivity(), CalibrationActivity.class);
+				intent.putExtra("mode", "walking");
 	            getActivity().startActivity(intent);
 			}
 		});

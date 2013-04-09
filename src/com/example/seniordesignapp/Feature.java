@@ -208,7 +208,7 @@ public class Feature {
 			if (lookForMax){
 				if (vx < mx-threshold){
 					maxTab.add(maxAccel);
-					Log.d(DEBUG_TAG,"max accel is x" + maxAccel.getX()+"max accel y is"+maxAccel.getY()+" max accel z is"+maxAccel.getZ());
+					//Log.d(DEBUG_TAG,"max accel is x" + maxAccel.getX()+"max accel y is"+maxAccel.getY()+" max accel z is"+maxAccel.getZ());
 					mn = vx;
 					lookForMax = false;
 				}

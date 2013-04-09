@@ -46,7 +46,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	private CountDownTimer mCountdown;
 	
 	private boolean mIsCountdown;
-	
+	private String mMode;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -89,6 +89,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		mSensor = (Sensor) mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 //		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_NORMAL);
 		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_FASTEST);
+		mMode = getIntent().getExtras().getString("mode");
 	}
 	@Override
 	protected void onStart(){
@@ -124,7 +125,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		finally{
 			mDb.endTransaction();
 			mDbHelper.close();
-			new FeaturesTask().execute();
+			new FeaturesTask().execute(mMode);
 		}
     }
 	@Override
@@ -174,11 +175,11 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 			mStartButton.setEnabled(true); 
 	     }	
 	}
-	private class FeaturesTask extends AsyncTask<Void,Void,Void>{
+	private class FeaturesTask extends AsyncTask<String,Void,Void>{
 		@Override
-		protected Void doInBackground(Void... arg0) {
+		protected Void doInBackground(String... arg0) {
 			try {
-				new FeaturesConstructor(getApplicationContext()).constructFeatures();
+				new FeaturesConstructor(getApplicationContext()).constructFeatures(arg0[0]);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
