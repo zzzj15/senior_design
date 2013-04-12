@@ -36,7 +36,7 @@ public class FeaturesConstructor{
 	private List<Acceleration> accelerations = new ArrayList<Acceleration>();
 	private SQLiteDatabase mDb;
 	private Context mContext;
-	private int SAMPLE_SIZE = 1000;
+	private int SAMPLE_SIZE = 500;
 	private final int BIN_SIZE = 10;  
 	private Cursor mCursor;
 	private FileOutputStream outputStream;
@@ -107,7 +107,7 @@ public class FeaturesConstructor{
 		/* Get the just-recorded accelerations from db and construct a feature from every 200 datapoints*/
 		
 		mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
-				+" ORDER BY timestamp DESC",null);
+				+" ORDER BY timestamp ASC",null);
 		Log.d(DEBUG_TAG,"number of points returned from database "+mCursor.getCount());
 		mCursor.moveToFirst();
 		long timeSt=0;

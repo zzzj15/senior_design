@@ -90,7 +90,7 @@ public class Feature {
 		avgRlstAccel = getAvgRlstAccel(x,y,z);
 		
 		//Find Time Peaks
-		timePeaks = getTimePeaks(accelerations);
+		timePeaks = getTimePeaks(accelerations,statsX,statsY,statsZ);
 		
 		//Find Binned Distribution
 		Frequency fx = new Frequency();
@@ -142,14 +142,15 @@ public class Feature {
 	 *  
 	 * @return
 	 */
-	private double[] getTimePeaks(List<Acceleration> accelerations){
+	private double[] getTimePeaks(List<Acceleration> accelerations,DescriptiveStatistics statsX,DescriptiveStatistics statsY,DescriptiveStatistics statsZ){
 		double timePeaks[] = new double[3];
 //		timePeaks[0] = peakDet(accelerations,'x',0.05);
 //		timePeaks[1] =peakDet(accelerations,'y',0.05);
 //		timePeaks[2] =peakDet(accelerations,'z',0.05);
-		timePeaks[0] = peakDet(accelerations,'x',0.3);
-		timePeaks[1] =peakDet(accelerations,'y',0.3);
-		timePeaks[2] =peakDet(accelerations,'z',0.3);
+		
+		timePeaks[0] = peakDet(accelerations,'x',0.15*(statsX.getMax()-statsX.getMin()));//15% of the full range as threshold
+		timePeaks[1] =peakDet(accelerations,'y',0.15*(statsY.getMax()-statsY.getMin()));
+		timePeaks[2] =peakDet(accelerations,'z',0.15*(statsZ.getMax()-statsZ.getMin()));
 		return timePeaks;
 		
 	}
@@ -158,9 +159,6 @@ public class Feature {
 		double min = stats.getMin();
 		double binSize = (max-min)/NUM_BIN;
 		long numElements = stats.getN();
-		Log.d(DEBUG_TAG,"min = "+min);
-		Log.d(DEBUG_TAG,"max = "+max);
-//		Log.d(DEBUG_TAG,"numElements = "+numElements);
 		for (int i=index+1;i<=NUM_BIN+index;i++){
 			double minsize = (min+(i-1)*binSize);
 			//Log.d(DEBUG_TAG,"Min+("+i+"-1)*binSize = "+minsize);
@@ -208,7 +206,7 @@ public class Feature {
 			if (lookForMax){
 				if (vx < mx-threshold){
 					maxTab.add(maxAccel);
-					//Log.d(DEBUG_TAG,"max accel is x" + maxAccel.getX()+"max accel y is"+maxAccel.getY()+" max accel z is"+maxAccel.getZ());
+					Log.d(DEBUG_TAG,"max accel is x" + maxAccel.getX()+"max accel y is"+maxAccel.getY()+" max accel z is"+maxAccel.getZ());
 					mn = vx;
 					lookForMax = false;
 				}
@@ -254,7 +252,7 @@ public class Feature {
 //				count++;
 //				prev = cur;
 //			}
-			return (double) -diffSum/maxTab.size(); //- because we are analyzing the data backwards.
+			return (double) diffSum/maxTab.size(); 
 		}
 	}
 	@Override

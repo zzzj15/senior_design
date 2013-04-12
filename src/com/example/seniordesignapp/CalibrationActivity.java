@@ -39,7 +39,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	private SQLiteDatabase mDb;
 	private List<SensorEvent> sensorEvents;
 	
-	private final int countdownPeriod = 30; //3 Minutes
+	private final int countdownPeriod = 180; //3 Minutes
 	
 	private TextView mCountdownTv;
 	private Button mStartButton;
@@ -47,6 +47,9 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	
 	private boolean mIsCountdown;
 	private String mMode;
+	private long startTime,endTime,count=0;
+	private ArrayList<Long> timeStamps;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,8 +90,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		/*Register the Sensor Listener */
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		mSensor = (Sensor) mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-//		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_NORMAL);
-		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_NORMAL);
 		mMode = getIntent().getExtras().getString("mode");
 	}
 	@Override
@@ -100,6 +102,8 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 				if (mCountdown==null){//Start to countdown 3 minutes and stop the service
 					mCountdown = new myCountdown(1000*countdownPeriod, 1000);
 					mCountdown.start();
+					mIsCountdown = true;
+					timeStamps = new ArrayList<Long>();
 				}
 				mStartButton.setEnabled(false);//Disable the button after it's clicked
 			}
@@ -112,15 +116,17 @@ public class CalibrationActivity extends Activity implements SensorEventListener
         mSensorManager.unregisterListener(this);
         finish();
         mDb.beginTransaction();
-		try{			
+		try{
+			int i=0;
 			for (SensorEvent e: sensorEvents){
 //				mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
 //						+", "+ e.values[1] + ", " + e.values[2] + ", " + System.currentTimeMillis() + " );");	
-				long curTime = System.currentTimeMillis();
 				mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
-						+", "+ e.values[1] + ", " + e.values[2] + ", " + curTime+ " );");
+						+", "+ e.values[1] + ", " + e.values[2] + ", " + timeStamps.get(i)+ " );");
+				i++;
 			}
 			mDb.setTransactionSuccessful();
+			timeStamps = new ArrayList<Long>();
 		}
 		finally{
 			mDb.endTransaction();
@@ -130,7 +136,10 @@ public class CalibrationActivity extends Activity implements SensorEventListener
     }
 	@Override
 	public synchronized void onSensorChanged(SensorEvent sensorEvent) {        // update instantaneous data:
+		
 		if(mIsCountdown){
+		if(count==0)
+			startTime=System.currentTimeMillis();
 		// get rid the oldest sample in history:
         if (mXSeries.size() > HISTORY_SIZE) {
         	mXSeries.removeFirst();
@@ -142,11 +151,15 @@ public class CalibrationActivity extends Activity implements SensorEventListener
         mXSeries.addLast(null, sensorEvent.values[0]);
         mYSeries.addLast(null, sensorEvent.values[1]);
         mZSeries.addLast(null, sensorEvent.values[2]);
+        long curTime = System.currentTimeMillis();
+        timeStamps.add(curTime);
+        Log.d(DEBUG_TAG,"adding sensor event "+count+ " at "+curTime);
         sensorEvents.add(sensorEvent);
         
         // redraw the Plots:
         
-        	mXyzHistPlot.redraw();	
+        	mXyzHistPlot.redraw();
+        	count++;
 		}
 	}
 	@Override
@@ -159,7 +172,6 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 			super(millisInFuture, countDownInterval);
 		}
 		public void onTick(long millisUntilFinished) { //OnTick, we will update the display of the digital counter
-			mIsCountdown = true;
 			int minutes = (int) millisUntilFinished / (60*1000);
 			int seconds = (int) (millisUntilFinished - minutes*60*1000)/1000;
 			if (seconds >= 10)
@@ -170,6 +182,9 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	     public void onFinish() {
 	    	//When the countdown is finished, we will set the transactionStatus to be true and thus data will be stored  
 			mCountdownTv.setText("Done!");
+			endTime=System.currentTimeMillis();
+			Log.d(DEBUG_TAG,"SENSOR BEGIN TIME "+startTime);
+			Log.d(DEBUG_TAG,"SENSOR FINISH TIME "+endTime+" COUNT "+count);
 			mIsCountdown=false;
 			mCountdown = null;
 			mStartButton.setEnabled(true); 
