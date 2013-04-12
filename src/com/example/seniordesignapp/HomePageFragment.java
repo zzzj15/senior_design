@@ -3,6 +3,7 @@ package com.example.seniordesignapp;
 import java.util.ArrayList;
 
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -10,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.widget.AbsListView;
@@ -21,23 +24,91 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import android.widget.PopupWindow;
 
 public class HomePageFragment extends Fragment {
 
 	ExpandableListView lv;
 	ToggleButton tButton;
+    private DatabaseHelper mDbHelper;
+    private SQLiteDatabase mDb;
+    private Cursor mCursor;
+    private static String TAG = "HomePageFramentDynamicLog";
+	//String timeStamp;
+	private String[] groups;
+	private Button refreshButton;
+	class MyExpandableListAdapter extends BaseExpandableListAdapter implements ExpandableListView.OnChildClickListener, OnClickListener {
 
-	class MyExpandableListAdapter extends BaseExpandableListAdapter implements ExpandableListView.OnChildClickListener{
-
-		private String[] groups = setGroupData();
+		private String[] groups= setGroupData();
 		private String[][] children = setChildGroupData();
 
 		public String[] setGroupData() {// WIP - Hard Code for Now..
+			
 			ArrayList<String> groupItem = new ArrayList<String>();
-			groupItem.add("10:00 Ran for 30 minutes");
-			groupItem.add("11:35 Ate 1 Hamburger");
+			ArrayList<String> childItem = new ArrayList<String>();
+			String timeStamp;
+			String fname;
+			String GL;
+			String item;
+			mDbHelper = new DatabaseHelper(getActivity());
+ 			mDb = mDbHelper.getWritableDatabase();
+ 			String sql = "SELECT * FROM foodGPS  ORDER BY GPS_time DESC LIMIT 3";
+			mCursor = mDb.rawQuery(sql,null);
+		
+/*			if (mCursor.getCount() > 0) { // now it is taking the first
+ 				// match
+ 				// WIP fix later
+				mCursor.moveToFirst();
+ 				timeStamp = mCursor.getString(mCursor.getColumnIndex("GPS_time"));
+ 				groupItem.add(timeStamp);
+ 			} else {
+ 				Log.d(TAG,"does not exist in food database! Add it");
+ 				//groupItem.add("");
+ 			}
+			*/
+			
+			if(mCursor.getCount()>0){ //now it is taking the first match WIP fix later
+				Log.d(TAG,"Adding items to Dynamic Log");
+				mCursor.moveToFirst();
+				timeStamp = mCursor.getString(mCursor.getColumnIndex("GPS_time"));
+				timeStamp = timeStamp.substring(4, 6) + "/" + 
+							timeStamp.substring(6, 8) + " "+ 
+							timeStamp.substring(8, 10) + ":" + 
+							timeStamp.substring(10, 12);
+				fname = mCursor.getString(mCursor.getColumnIndex("food_name"));
+				fname = fname.substring(0, 18)  + "...";
+				GL = mCursor.getString(mCursor.getColumnIndex("GL"));
+				item = timeStamp + " Had" + fname;
+ 				groupItem.add(item);
+ 				childItem.add(GL);
+					while (!mCursor.isLast()) {
+						mCursor.moveToNext();
+						timeStamp = mCursor.getString(mCursor.getColumnIndex("GPS_time"));
+						timeStamp = timeStamp.substring(4, 6) + "/" + 
+									timeStamp.substring(6, 8) + " "+ 
+									timeStamp.substring(8, 10) + ":" + 
+									timeStamp.substring(10, 12);
+						fname = mCursor.getString(mCursor.getColumnIndex("food_name"));
+						fname = fname.substring(0, 18)  + "...";
+						GL = mCursor.getString(mCursor.getColumnIndex("GL"));
+						item = timeStamp + " Had" + fname;
+		 				groupItem.add(item);
+		 				childItem.add(GL);
+					}
+					
+			}
+			else{
+				Log.d(TAG,"Dynamic Log is empty");
+				groupItem.add("Empty");
+				showToastMessage("Nothing is in the database...");
+			}
+			
+			
+			
+			
+		/*	groupItem.add("11:35 Ate 1 Hamburger");
 			groupItem.add("4:00 Biked for 20 minutes");
-			groupItem.add("5:21 Climed 2 flights of stairs");
+			groupItem.add("5:21 Climed 2 flights of stairs");*/
 
 			String[] stockArr = new String[groupItem.size()];
 			stockArr = groupItem.toArray(stockArr);
@@ -80,11 +151,12 @@ public class HomePageFragment extends Fragment {
 		// child.add("5:20 - 5:21");
 		// childItem.add(child);
 		//
-			String[][] childItem = { { "Accelerometer Data", "9:30 - 10:00" },
+			String[][] childItem = { //{ "Accelerometer Data", "9:30 - 10:00" },
 					{ "Voice Input Data", "11:35" },
 					{ "Accelerometer Data", "3:40 - 4:00" },
 					{ "Accelerometer Data", "5:20 - 5:21" } };
-			return childItem;
+			return childItem; 
+			//return null;
 		}
 
 		// public boolean onCreateOptionsMenu(Menu menu) {
@@ -116,6 +188,7 @@ public class HomePageFragment extends Fragment {
 			textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
 			// Set the text starting position
 			textView.setPadding(36, 0, 0, 0);
+			
 			return textView;
 		}
 
@@ -187,6 +260,16 @@ public class HomePageFragment extends Fragment {
 		}
 
 
+
+
+		@Override
+		public void onClick(View arg0) {
+			// TODO Auto-generated method stub
+			
+			
+		}
+
+
 	}
 
 	Gauge meter; 
@@ -208,9 +291,9 @@ public class HomePageFragment extends Fragment {
 		LinearLayout mlinearLayout = (LinearLayout) inflater.inflate(
 				R.layout.activity_home_page, container, false);
 
-		meter = (Gauge) mlinearLayout.findViewById(R.id.meter);
-		meter.setValue(30);
-		//temp = temp + 10;
+		//meter = (Gauge) mlinearLayout.findViewById(R.id.meter);
+		//meter.setValue(30);
+		
 		//meter.setValue(temp);
 		//meter.setOnClickListener(this);
 		
@@ -243,10 +326,34 @@ public class HomePageFragment extends Fragment {
 			public boolean onChildClick(ExpandableListView parent, View v,
 					int groupPosition, int childPosition, long id) {
 				showToastMessage("Work! + ParentID =" + groupPosition + " ChildID = " + childPosition );
+				
+/*				
+		        //We need to get the instance of the LayoutInflater, use the context of this activity
+		        LayoutInflater inflater = (LayoutInflater) getActivity()
+		                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		        //Inflate the view from a predefined XML layout
+		        View layout = inflater.inflate(R.layout.popup_layout,
+		                (ViewGroup) getActivity().findViewById(R.id.popup_element));
+				 // create a 300px width and 470px height PopupWindow
+		        PopupWindow pw = new PopupWindow(layout, 300, 470, true);
+		        // display the popup in the center
+		        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
+*/			
 				return false;
 			}
 		});
+		refreshButton = (Button) mlinearLayout.findViewById(R.id.testing);
+		refreshButton.setOnClickListener( new OnClickListener() {
 			
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(getActivity(), MainActivity.class );
+				showToastMessage("Refreshing");
+				startActivity(i);
+				//finish();
+				
+			}
+		});
 
 		return mlinearLayout;
 	}

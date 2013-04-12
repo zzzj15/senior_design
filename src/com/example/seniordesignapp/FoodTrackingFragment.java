@@ -416,8 +416,9 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 									int id) {
 								
 								 /* Check Date & Time */
-				  				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+				  				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
 				  				String currentDateandTime = sdf.format(new Date());
+				  				Log.d(TAG,"Time :"+currentDateandTime);
 			            		updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue,currentDateandTime);
 			            		
 			 	  				
@@ -466,7 +467,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 			 	    			} else {
 			 	    				tmplon = tmplon + " does not exist in food database! Add it";
 			 	    			}
-				 	   			mDbHelper = new DatabaseHelper(getActivity());
+		 	   			mDbHelper = new DatabaseHelper(getActivity());
 			 	    			mDb = mDbHelper.getWritableDatabase();
 			 	    			sql = "SELECT GPS_time FROM foodGPS WHERE lower(food_name) LIKE lower('%"
 			 	    					+ mlv.getItemAtPosition(pos).toString() + "%');";
@@ -476,7 +477,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 			 	    				// match
 			 	    				// WIP fix later
 			 	    				crs.moveToFirst();
-			 	    				tmptime = crs.getString(crs.getColumnIndex("longitude"));
+			 	    				tmptime = crs.getString(crs.getColumnIndex("GPS_time"));
 			 	    			} else {
 			 	    				tmptime = tmptime + " does not exist in food database! Add it";
 			 	    			}
@@ -643,7 +644,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	            	  //for testing
 	            	  //lon = 5.2;
 	            	  //lat = 5.2;
-	            	  /* Get the position of user's selection*/
+	            	  //Get the position of user's selection
 	            	  int pos = mlv.getCheckedItemPosition();
 	            	  int spinner_pos =  spin_amount.getSelectedItemPosition();
 	            	  

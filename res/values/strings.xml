@@ -25,5 +25,6 @@
     <string name="Signup">Signup</string>
     <string name="TargetWeight">TargetWeight</string>
     <string name="title_activity_profile_information">ProfileInformationActivity</string>
+    <color name="mycolor1">#FF0000</color>
 
 </resources>

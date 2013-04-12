@@ -50,7 +50,7 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:gravity="center" > -->
-    <com.example.seniordesignapp.Gauge
+    <!-- com.example.seniordesignapp.Gauge
         android:id="@+id/meter"
         android:layout_width="wrap_content"
         android:layout_height="180dp"
@@ -77,25 +77,10 @@
         atswidget:showRange="true"
         atswidget:totalNotches="120"
         atswidget:unitTitle=""
-        atswidget:upperTitle="" />
+        atswidget:upperTitle="" /-->
 	 <!--/RelativeLayout --> 
 	 
     
-    <!-- LinearLayout
-        xmlns:atswidget="http://schemas.android.com/apk/res/com.atsglobal.android.widgets"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="horizontal"
-        android:padding="0px" >
-
-        <Button
-            android:id="@+id/add"
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:padding="0px"
-            android:text="Add" />
-    </LinearLayout-->
 
     <View
         android:id="@+id/Divider"
@@ -113,7 +98,32 @@
         android:id="@+id/log_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawSelectorOnTop="false" >
-    </ExpandableListView>
+        android:drawSelectorOnTop="false"/>
+    
+
+	<LinearLayout 
+	    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10px">
+        <Button
+            android:id="@+id/testing"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:padding="0px"
+            android:text="Refresh" />
+	</LinearLayout>
+    
+    <!-- The PullToRefreshExpandableListView replaces a standard ExpandableListView widget. -->
+
+    <!--com.example.seniordesignappcom.example.seniordesignapppulltorefresh.library.PullToRefreshExpandableListView
+        xmlns:ptr="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/log_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        ptr:ptrHeaderBackground="@android:color/darker_gray"
+        ptr:ptrHeaderTextColor="@android:color/white"
+        ptr:ptrMode="pullUpFromBottom" -->
+    
 
 </LinearLayout>
