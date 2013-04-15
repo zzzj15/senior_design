@@ -6,9 +6,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
@@ -43,6 +44,7 @@ public class FeaturesConstructor{
 	private String runningFileName = "activity_classification_running.arff";
 	private String walkingFileName = "activity_classification_walking.arff";
 	private String fileName = "activity_classification.arff";
+	private String classfierFileName = "classifier";
 	private StringBuffer buf=new StringBuffer();
 	
 	public FeaturesConstructor(Context context){
@@ -62,7 +64,13 @@ public class FeaturesConstructor{
 			atts.add(new Attribute("binDist_"+e+i));
 			}
 		}
+		
+		// Declare the class attribute along with its values
+//		List<String> classVal = new ArrayList<String>();
+//		classVal.add("running");
+//		classVal.add("walking");
 		atts.add(new Attribute("class",(ArrayList<String>) null)); // - string
+//		atts.add(new Attribute("class",classVal)); // - string
 		
 		data = new Instances("activity", atts, 0);
 		
@@ -98,7 +106,7 @@ public class FeaturesConstructor{
 	    return data;
 	}
 	
-	public void constructFeatures(String mode) throws IOException{
+	public void constructFeatures(String mode) throws Exception{
 		if(mode.equals("running"))
 			outputStream = mContext.openFileOutput(runningFileName, Context.MODE_PRIVATE);
 		if(mode.equals("walking"))
@@ -121,7 +129,7 @@ public class FeaturesConstructor{
 			//ht.put(timeSt, mCursor.getFloat(1));
 			accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
 					mCursor.getFloat(3),timeSt));
-			Log.d(DEBUG_TAG,"time is "+timeSt+"x is "+mCursor.getFloat(1)+" "+mCursor.getFloat(2)+" "+mCursor.getFloat(3));
+//			Log.d(DEBUG_TAG,"time is "+timeSt+"x is "+mCursor.getFloat(1)+" "+mCursor.getFloat(2)+" "+mCursor.getFloat(3));
 			//}
 			mCursor.moveToNext();
 		}
@@ -143,13 +151,19 @@ public class FeaturesConstructor{
 		
 		File rfile = mContext.getFileStreamPath(runningFileName);
 		File wfile = mContext.getFileStreamPath(walkingFileName);
-		if(rfile.exists()&&wfile.exists()){ //merge two files remove extra header
+		if(rfile.exists()&&wfile.exists()){ //merge two files remove extra header and generate classifier
 			outputStream = mContext.openFileOutput(fileName, Context.MODE_PRIVATE);
 			BufferedReader br = new BufferedReader(new FileReader(rfile));
 			String sCurrentLine;
 			while ((sCurrentLine = br.readLine()) != null) {
-				outputStream.write(sCurrentLine.getBytes());
-				outputStream.write("\n".getBytes());
+				if(sCurrentLine.equals("@attribute class string")){
+					outputStream.write("@attribute class {running,walking}".getBytes());
+					outputStream.write("\n".getBytes());
+				}
+				else{
+					outputStream.write(sCurrentLine.getBytes());
+					outputStream.write("\n".getBytes());
+				}
 			}
 			br.close();
 			br = new BufferedReader(new FileReader(wfile));
@@ -164,6 +178,20 @@ public class FeaturesConstructor{
 			}
 			br.close();
 			outputStream.close();
+			/* generate classifier*/
+			String[] options = new String[4];
+			options[0] = "-t";
+			options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+			options[2] = "-d";
+			options[3] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
+			Log.d(DEBUG_TAG,options[1]);
+			Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
+			
+//			options[0] = "-l";
+//			options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
+//			options[2] = "-T";
+//			options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+//			Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
 		}
 		
 		/* We don't need the data for calibration*/

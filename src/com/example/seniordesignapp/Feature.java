@@ -147,10 +147,22 @@ public class Feature {
 //		timePeaks[0] = peakDet(accelerations,'x',0.05);
 //		timePeaks[1] =peakDet(accelerations,'y',0.05);
 //		timePeaks[2] =peakDet(accelerations,'z',0.05);
-		
-		timePeaks[0] = peakDet(accelerations,'x',0.15*(statsX.getMax()-statsX.getMin()));//15% of the full range as threshold
-		timePeaks[1] =peakDet(accelerations,'y',0.15*(statsY.getMax()-statsY.getMin()));
-		timePeaks[2] =peakDet(accelerations,'z',0.15*(statsZ.getMax()-statsZ.getMin()));
+		double xthres=0,ythres=0,zthres=0;
+		if(statsX.getMax()-statsX.getMin()<0.03)
+			xthres = 1;
+		else
+			xthres = statsX.getMax()-statsX.getMin();
+		if(statsY.getMax()-statsY.getMin()<0.03)
+			ythres = 1;
+		else
+			ythres = statsY.getMax()-statsY.getMin();
+		if(statsZ.getMax()-statsZ.getMin()<0.03)
+			zthres = 1;
+		else
+			zthres = statsZ.getMax()-statsZ.getMin();
+		timePeaks[0] = peakDet(accelerations,'x',0.15*xthres);//15% of the full range as threshold
+		timePeaks[1] =peakDet(accelerations,'y',0.15*ythres);
+		timePeaks[2] =peakDet(accelerations,'z',0.15*zthres);
 		return timePeaks;
 		
 	}
@@ -206,7 +218,7 @@ public class Feature {
 			if (lookForMax){
 				if (vx < mx-threshold){
 					maxTab.add(maxAccel);
-					Log.d(DEBUG_TAG,"max accel is x" + maxAccel.getX()+"max accel y is"+maxAccel.getY()+" max accel z is"+maxAccel.getZ());
+//					Log.d(DEBUG_TAG,"max accel is x" + maxAccel.getX()+"max accel y is"+maxAccel.getY()+" max accel z is"+maxAccel.getZ());
 					mn = vx;
 					lookForMax = false;
 				}

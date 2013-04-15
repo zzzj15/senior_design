@@ -16,6 +16,7 @@ import android.os.CountDownTimer;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -54,6 +55,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_calibration);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		mIsCountdown=false;
 		mCountdownTv = (TextView) findViewById(R.id.countdown_timer);
 		mStartButton = (Button) findViewById(R.id.start_button);
@@ -153,7 +155,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
         mZSeries.addLast(null, sensorEvent.values[2]);
         long curTime = System.currentTimeMillis();
         timeStamps.add(curTime);
-        Log.d(DEBUG_TAG,"adding sensor event "+count+ " at "+curTime);
+//        Log.d(DEBUG_TAG,"adding sensor event "+count+ " at "+curTime);
         sensorEvents.add(sensorEvent);
         
         // redraw the Plots:
@@ -196,6 +198,9 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 			try {
 				new FeaturesConstructor(getApplicationContext()).constructFeatures(arg0[0]);
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;
