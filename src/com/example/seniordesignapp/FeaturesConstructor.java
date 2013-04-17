@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,15 +36,15 @@ public class FeaturesConstructor{
 	private List<Acceleration> accelerations = new ArrayList<Acceleration>();
 	private SQLiteDatabase mDb;
 	private Context mContext;
-	private int SAMPLE_SIZE = 500;
+	private int SAMPLE_SIZE = 1000;
 	private final int BIN_SIZE = 10;  
 	private Cursor mCursor;
 	private FileOutputStream outputStream;
 	private String runningFileName = "activity_classification_running.arff";
 	private String walkingFileName = "activity_classification_walking.arff";
+	private String sittingFileName = "activity_classification_sitting.arff";
 	private String fileName = "activity_classification.arff";
 	private String classfierFileName = "classifier";
-	private StringBuffer buf=new StringBuffer();
 	
 	public FeaturesConstructor(Context context){
 		mContext = context;
@@ -111,6 +110,8 @@ public class FeaturesConstructor{
 			outputStream = mContext.openFileOutput(runningFileName, Context.MODE_PRIVATE);
 		if(mode.equals("walking"))
 			outputStream = mContext.openFileOutput(walkingFileName, Context.MODE_PRIVATE);
+		if(mode.equals("sitting"))
+			outputStream = mContext.openFileOutput(sittingFileName, Context.MODE_PRIVATE);
 		
 		/* Get the just-recorded accelerations from db and construct a feature from every 200 datapoints*/
 		
@@ -151,13 +152,14 @@ public class FeaturesConstructor{
 		
 		File rfile = mContext.getFileStreamPath(runningFileName);
 		File wfile = mContext.getFileStreamPath(walkingFileName);
-		if(rfile.exists()&&wfile.exists()){ //merge two files remove extra header and generate classifier
+		File sfile = mContext.getFileStreamPath(sittingFileName);
+		if(rfile.exists()&&wfile.exists()&&sfile.exists()){ //merge two files remove extra header and generate classifier
 			outputStream = mContext.openFileOutput(fileName, Context.MODE_PRIVATE);
 			BufferedReader br = new BufferedReader(new FileReader(rfile));
 			String sCurrentLine;
 			while ((sCurrentLine = br.readLine()) != null) {
 				if(sCurrentLine.equals("@attribute class string")){
-					outputStream.write("@attribute class {running,walking}".getBytes());
+					outputStream.write("@attribute class {running,walking,sitting}".getBytes());
 					outputStream.write("\n".getBytes());
 				}
 				else{
@@ -166,8 +168,21 @@ public class FeaturesConstructor{
 				}
 			}
 			br.close();
+			//continue reading wfile
 			br = new BufferedReader(new FileReader(wfile));
 			boolean toWrite = false;
+			while ((sCurrentLine = br.readLine()) != null) {
+				if(toWrite){
+					outputStream.write(sCurrentLine.getBytes());
+					outputStream.write("\n".getBytes());
+				}
+				if(sCurrentLine.equals("@data"))
+					toWrite=true;
+			}
+			br.close();
+			//continue reading sfile
+			br = new BufferedReader(new FileReader(sfile));
+			toWrite = false;
 			while ((sCurrentLine = br.readLine()) != null) {
 				if(toWrite){
 					outputStream.write(sCurrentLine.getBytes());

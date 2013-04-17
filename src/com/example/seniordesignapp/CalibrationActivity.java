@@ -58,6 +58,13 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		mIsCountdown=false;
 		mCountdownTv = (TextView) findViewById(R.id.countdown_timer);
+		//initialize textview
+		int minutes = (int) 1000*countdownPeriod / (60*1000);
+		int seconds = (int) (1000*countdownPeriod - minutes*60*1000)/1000;
+		if (seconds >= 10)
+			mCountdownTv.setText(minutes+":" + seconds);	
+		else
+			mCountdownTv.setText(minutes+":0" + seconds);
 		mStartButton = (Button) findViewById(R.id.start_button);
 		
 		// This list will be temporarily storing the accelerations data  
