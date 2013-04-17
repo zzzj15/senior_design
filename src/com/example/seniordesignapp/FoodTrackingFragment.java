@@ -373,27 +373,95 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		mDb.insert("FoodGPS",null,value);
         
     }
-	private ArrayList<String> refreshFrequentChoice(){
-		 ArrayList<String> sData = new ArrayList<String>();
-		String sql = "SELECT GL,food_name, COUNT(food_name)"
-				+ " FROM FoodGPS WHERE food_name NOT NULL"
-				+" GROUP BY food_name"
-				+" ORDER BY COUNT(food_name) DESC"
-				+" LIMIT 5";
-		mCursor = mDb.rawQuery(sql, null);
-		
-		if(mCursor.getCount()>0){ //now it is taking the first match WIP fix later
-			mCursor.moveToFirst();
-			sData.add(mCursor .getString(mCursor .getColumnIndex("food_name")));
-				while (!mCursor .isLast()) {
-					mCursor .moveToNext();
-				    String Name = mCursor .getString(mCursor .getColumnIndex("food_name"));
-				    sData.add(Name);
-				}
+
+	private ArrayList<String> refreshFrequentChoice() {
+
+		/* See Where is selected (GPS) */
+		/* Create GPS class object */
+		gps = new GPSTracker(getActivity());
+		/* Check if GPS enabled */
+		if (gps.canGetLocation()) {
+			lat = gps.getLatitude();
+			lon = gps.getLongitude();
+			// \n is for new line
+			Toast.makeText(getActivity(),
+					"Your Location is - \nLat: " + lat + "\nLong: " + lon,
+					Toast.LENGTH_LONG).show();
+		} else {
+			// can't get location
+			// GPS or Network is not enabled
+			// Ask user to enable GPS/network in settings
+			gps.showSettingsAlert();
 		}
-		isValid=true;
+		float tmplong = 0;
+		float tmplat = 0;
+		float tmpdis= 0;
+		ContentValues value=new ContentValues();
+		String sql = "SELECT food_name,latitude, longitude, distance "
+				+ " FROM FoodGPS WHERE food_name NOT NULL";
+		mCursor = mDb.rawQuery(sql, null);
+		if (mCursor.getCount() > 0) { // now it is taking the first match WIP
+			// fix later
+		mCursor.moveToFirst();
+		tmplat = mCursor.getFloat(mCursor.getColumnIndex("latitude"));
+		tmplong = mCursor.getFloat(mCursor.getColumnIndex("longitude"));
+		tmpdis = distFrom(tmplat,tmplong, lat.floatValue(), lon.floatValue());
+		Log.d(TAG, "Adding distance " +tmpdis+ " to FoodGPS");		
+		value.put("distance", tmpdis);
+		mDb.update("FoodGPS", value, null, null);
+		while (!mCursor.isLast()) {
+			mCursor.moveToNext();
+			tmplat = mCursor.getFloat(mCursor.getColumnIndex("latitude"));
+			tmplong = mCursor.getFloat(mCursor.getColumnIndex("longitude"));
+			tmpdis = distFrom(tmplat,tmplong, lat.floatValue(), lon.floatValue());
+			Log.d(TAG, "Adding distance " +tmpdis+ " to FoodGPS");		
+			value.put("distance", tmpdis);
+			mDb.update("FoodGPS", value, null, null);
+			}
+		showToastMessage("Got " + tmplat + "\n& " + tmplong +"\ndistance is" + tmpdis);
+		}
+		
+		// Display on the list
+		ArrayList<String> sData = new ArrayList<String>();
+		 sql = "SELECT food_name, COUNT(food_name), distance"
+				+ " FROM FoodGPS WHERE food_name NOT NULL"
+				+ " GROUP BY food_name" + " ORDER BY COUNT(food_name) DESC"
+				+ " LIMIT 5";
+		 
+		 sql = "SELECT food_name, distance FROM (" + sql + ") ORDER BY distance DESC";
+		mCursor = mDb.rawQuery(sql, null);
+
+		if (mCursor.getCount() > 0) { // now it is taking the first match WIP
+										// fix later
+			mCursor.moveToFirst();
+			sData.add(mCursor.getString(mCursor.getColumnIndex("food_name")));
+			while (!mCursor.isLast()) {
+				mCursor.moveToNext();
+				String Name = mCursor.getString(mCursor
+						.getColumnIndex("food_name"));
+				sData.add(Name);
+			}
+		}
+		isValid = true;
 		return sData;
 	}
+
+	public static float distFrom(float lat1, float lng1, float lat2, float lng2) {
+		double earthRadius = 3958.75;
+		double dLat = Math.toRadians(lat2 - lat1);
+		double dLng = Math.toRadians(lng2 - lng1);
+		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+				+ Math.cos(Math.toRadians(lat1))
+				* Math.cos(Math.toRadians(lat2)) * Math.sin(dLng / 2)
+				* Math.sin(dLng / 2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		double dist = earthRadius * c;
+
+		int meterConversion = 1609;
+
+		return new Float(dist * meterConversion).floatValue();
+	}
+	
 	private void uponConfirm(String x,final int spinner_pos, final int pos, final int glvalue,final String fName){
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setMessage(x)
@@ -616,25 +684,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	            	  
 	            	 
 	  				
-	  				/* See Where is selected (GPS) */
-	  				
-	  				/* Create GPS class object */
-	  				gps = new GPSTracker(getActivity());
 
-	  				/* Check if GPS enabled */
-	  				if (gps.canGetLocation()) {
-	  					lat = gps.getLatitude();
-	  					lon = gps.getLongitude();
-	  					// \n is for new line
-	  					// Toast.makeText(getActivity(),
-	  					// "Your Location is - \nLat: " + latitude + "\nLong: " +
-	  					// longitude, Toast.LENGTH_LONG).show();
-	  				} else {
-	  					// can't get location
-	  					// GPS or Network is not enabled
-	  					// Ask user to enable GPS/network in settings
-	  					gps.showSettingsAlert();
-	  				}
 	  				
 	            	  /* request location and store to database*/
 	            	 // Register the listener with the Location Manager to receive location updates

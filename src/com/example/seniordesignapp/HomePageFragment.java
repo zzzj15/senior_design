@@ -327,7 +327,7 @@ public class HomePageFragment extends Fragment {
 					int groupPosition, int childPosition, long id) {
 				showToastMessage("Work! + ParentID =" + groupPosition + " ChildID = " + childPosition );
 				
-/*				
+				
 		        //We need to get the instance of the LayoutInflater, use the context of this activity
 		        LayoutInflater inflater = (LayoutInflater) getActivity()
 		                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -335,10 +335,10 @@ public class HomePageFragment extends Fragment {
 		        View layout = inflater.inflate(R.layout.popup_layout,
 		                (ViewGroup) getActivity().findViewById(R.id.popup_element));
 				 // create a 300px width and 470px height PopupWindow
-		        PopupWindow pw = new PopupWindow(layout, 300, 470, true);
+		        PopupWindow pw = new PopupWindow(layout, 375, 600, true);
 		        // display the popup in the center
 		        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
-*/			
+			
 				return false;
 			}
 		});
