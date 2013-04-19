@@ -41,11 +41,13 @@ public class HomePageFragment extends Fragment {
 
 		private String[] groups= setGroupData();
 		private String[][] children = setChildGroupData();
-
+		private ArrayList<String> childItem; 
+		
 		public String[] setGroupData() {// WIP - Hard Code for Now..
 			
 			ArrayList<String> groupItem = new ArrayList<String>();
-			ArrayList<String> childItem = new ArrayList<String>();
+			childItem = new ArrayList<String>();
+			//ArrayList<String> childItem = new ArrayList<String>();
 			String timeStamp;
 			String fname;
 			String GL;
@@ -80,7 +82,7 @@ public class HomePageFragment extends Fragment {
 				GL = mCursor.getString(mCursor.getColumnIndex("GL"));
 				item = timeStamp + " Had" + fname;
  				groupItem.add(item);
- 				childItem.add(GL);
+ 				childItem.add("GL = " + GL);
 					while (!mCursor.isLast()) {
 						mCursor.moveToNext();
 						timeStamp = mCursor.getString(mCursor.getColumnIndex("GPS_time"));
@@ -93,13 +95,14 @@ public class HomePageFragment extends Fragment {
 						GL = mCursor.getString(mCursor.getColumnIndex("GL"));
 						item = timeStamp + " Had" + fname;
 		 				groupItem.add(item);
-		 				childItem.add(GL);
+		 				childItem.add("GL = " + GL);
 					}
 					
 			}
 			else{
 				Log.d(TAG,"Dynamic Log is empty");
 				groupItem.add("Empty");
+				childItem.add("Empty");
 				showToastMessage("Nothing is in the database...");
 			}
 			
@@ -151,11 +154,19 @@ public class HomePageFragment extends Fragment {
 		// child.add("5:20 - 5:21");
 		// childItem.add(child);
 		//
-			String[][] childItem = { //{ "Accelerometer Data", "9:30 - 10:00" },
+			
+			String[][] storeChild = new String[childItem.size()][1];
+			
+			for (int i = 0; i < childItem.size(); i++ ){
+				storeChild[i][0] = childItem.get(i);
+			}
+			
+/*			String[][] childItem = { //{ "Accelerometer Data", "9:30 - 10:00" },
 					{ "Voice Input Data", "11:35" },
 					{ "Accelerometer Data", "3:40 - 4:00" },
 					{ "Accelerometer Data", "5:20 - 5:21" } };
-			return childItem; 
+			*/
+			return storeChild; 
 			//return null;
 		}
 
@@ -321,7 +332,7 @@ public class HomePageFragment extends Fragment {
 		MyExpandableListAdapter expandableAdapter = new MyExpandableListAdapter();
 		lv.setAdapter(expandableAdapter);
 		lv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-			
+		PopupWindow pw;	
 			@Override
 			public boolean onChildClick(ExpandableListView parent, View v,
 					int groupPosition, int childPosition, long id) {
@@ -335,10 +346,20 @@ public class HomePageFragment extends Fragment {
 		        View layout = inflater.inflate(R.layout.popup_layout,
 		                (ViewGroup) getActivity().findViewById(R.id.popup_element));
 				 // create a 300px width and 470px height PopupWindow
-		        PopupWindow pw = new PopupWindow(layout, 375, 600, true);
+		        pw = new PopupWindow(layout, 375, 600, true);
 		        // display the popup in the center
 		        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
-			
+		        Button cancelButton = (Button) layout.findViewById(R.id.end_data_send_button);
+		        
+		        cancelButton.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						pw.dismiss();
+					}
+				});
+		        
 				return false;
 			}
 		});
