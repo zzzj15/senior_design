@@ -13,12 +13,12 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
@@ -44,12 +44,15 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	
 	private TextView mCountdownTv;
 	private Button mStartButton;
+	private ToggleButton mTestButton,mAlgoButton;
 	private CountDownTimer mCountdown;
 	
 	private boolean mIsCountdown;
 	private String mMode;
 	private long startTime,endTime,count=0;
 	private ArrayList<Long> timeStamps;
+	private ArrayList<Float> xSensorData,ySensorData,zSensorData;
+	private boolean mTest,mAlgo;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +69,10 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		else
 			mCountdownTv.setText(minutes+":0" + seconds);
 		mStartButton = (Button) findViewById(R.id.start_button);
-		
+		mTestButton = (ToggleButton) findViewById(R.id.Test);
+		mAlgoButton = (ToggleButton) findViewById(R.id.Algo);
+		mTest = false;
+		mAlgo = false;
 		// This list will be temporarily storing the accelerations data  
 		sensorEvents = new ArrayList<SensorEvent>();
 		
@@ -113,7 +119,24 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 					mCountdown.start();
 					mIsCountdown = true;
 					timeStamps = new ArrayList<Long>();
+					xSensorData = new ArrayList<Float>();
+					ySensorData = new ArrayList<Float>();
+					zSensorData = new ArrayList<Float>();
+					if(mTestButton.isChecked()){
+						mTest = true;
+					}
+					else{
+						mTest = false;
+					}
+						
+					if(mAlgoButton.isChecked()){
+						mAlgo = true;
+					}
+					else{
+						mAlgo = false;
+					}	
 				}
+				
 				mStartButton.setEnabled(false);//Disable the button after it's clicked
 			}
 		});
@@ -126,13 +149,15 @@ public class CalibrationActivity extends Activity implements SensorEventListener
         finish();
         mDb.beginTransaction();
 		try{
-			int i=0;
-			for (SensorEvent e: sensorEvents){
+//			int i=0;
+//			for (SensorEvent e: sensorEvents){
 //				mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
-//						+", "+ e.values[1] + ", " + e.values[2] + ", " + System.currentTimeMillis() + " );");	
-				mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
-						+", "+ e.values[1] + ", " + e.values[2] + ", " + timeStamps.get(i)+ " );");
-				i++;
+//						+", "+ e.values[1] + ", " + e.values[2] + ", " + timeStamps.get(i)+ " );");
+//				i++;
+//			}
+			for (int i=0;i<timeStamps.size();i++){
+				mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ xSensorData.get(i)
+						+", "+ ySensorData.get(i) + ", " + zSensorData.get(i) + ", " + timeStamps.get(i)+ " );");
 			}
 			mDb.setTransactionSuccessful();
 			timeStamps = new ArrayList<Long>();
@@ -147,28 +172,31 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	public synchronized void onSensorChanged(SensorEvent sensorEvent) {        // update instantaneous data:
 		
 		if(mIsCountdown){
-		if(count==0)
-			startTime=System.currentTimeMillis();
-		// get rid the oldest sample in history:
-        if (mXSeries.size() > HISTORY_SIZE) {
-        	mXSeries.removeFirst();
-        	mYSeries.removeFirst();
-        	mZSeries.removeFirst();
-        }
-
-        // add the latest history sample:
-        mXSeries.addLast(null, sensorEvent.values[0]);
-        mYSeries.addLast(null, sensorEvent.values[1]);
-        mZSeries.addLast(null, sensorEvent.values[2]);
-        long curTime = System.nanoTime();
-        timeStamps.add(curTime);
-//        Log.d(DEBUG_TAG,"adding sensor event "+count+ " at "+curTime);
-        sensorEvents.add(sensorEvent);
-        
-        // redraw the Plots:
-        
-        	mXyzHistPlot.redraw();
-        	count++;
+			if(count==0)
+				startTime=System.currentTimeMillis();
+			// get rid the oldest sample in history:
+	        if (mXSeries.size() > HISTORY_SIZE) {
+	        	mXSeries.removeFirst();
+	        	mYSeries.removeFirst();
+	        	mZSeries.removeFirst();
+	        }
+	
+	        // add the latest history sample:
+	        mXSeries.addLast(null, sensorEvent.values[0]);
+	        mYSeries.addLast(null, sensorEvent.values[1]);
+	        mZSeries.addLast(null, sensorEvent.values[2]);
+	        long curTime = System.nanoTime();
+	        timeStamps.add(curTime);
+	        xSensorData.add(sensorEvent.values[0]);
+	        ySensorData.add(sensorEvent.values[1]);
+	        zSensorData.add(sensorEvent.values[2]);
+//	        Log.d(DEBUG_TAG,"adding sensor event "+count+ " at "+curTime);
+	        //sensorEvents.add(sensorEvent);
+	        
+	        // redraw the Plots:
+	        
+	        	mXyzHistPlot.redraw();
+	        	count++;
 		}
 	}
 	@Override
@@ -203,7 +231,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		@Override
 		protected Void doInBackground(String... arg0) {
 			try {
-				new FeaturesConstructor(getApplicationContext()).constructFeatures(arg0[0]);
+				new FeaturesConstructor(getApplicationContext()).constructFeatures(arg0[0],mTest,mAlgo);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
@@ -214,7 +242,3 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		}
 	}
 }
-
-
-
-

@@ -188,6 +188,8 @@ public class Feature {
 		double mn = Double.MAX_VALUE;
 		double mx;
 		List<Acceleration> maxTab = new ArrayList<Acceleration>();
+//		Acceleration MaxAccel = new Acceleration(Double.MIN_VALUE,Double.MIN_VALUE,);
+		
 		Acceleration maxAccel = accelerations.get(0);
 		boolean lookForMax = true;
 		for (int i=1;i<accelerations.size();i++){
@@ -240,15 +242,13 @@ public class Feature {
 			long diffSum=0;
 			int count=0;
 			Acceleration prev=maxTab.get(0);
-			Log.d(DEBUG_TAG,"start time"+prev.getTimestamp());
 			for(Acceleration cur : maxTab){
 				diffSum +=cur.getTimestamp()-prev.getTimestamp();
 				count++;
 //				Log.d(DEBUG_TAG,"time stamp is "+cur.getTimestamp()+" count "+count+" prev "+prev.getTimestamp());
-//				Log.d(DEBUG_TAG,"cur x is "+cur.getX()+"prev x is "+prev.getX());
+//				Log.d(DEBUG_TAG,pos + "cur time is "+cur.getTimestamp()+"prev x is "+prev.getTimestamp());
 				prev = cur;
 			}
-			Log.d(DEBUG_TAG,"end time"+prev.getTimestamp());
 //			
 //			Iterator<Acceleration> iterator = maxTab.iterator();
 //			Acceleration cur,prev;

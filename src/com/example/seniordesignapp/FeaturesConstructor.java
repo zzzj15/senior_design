@@ -37,7 +37,7 @@ public class FeaturesConstructor{
 	private List<Acceleration> accelerations = new ArrayList<Acceleration>();
 	private SQLiteDatabase mDb;
 	private Context mContext;
-	private int SAMPLE_SIZE = 1000; //1000 works but not many sets of data will be generated
+	private int SAMPLE_SIZE = 200; //1000 works but not many sets of data will be generated
 	private final int BIN_SIZE = 10;  
 	private Cursor mCursor;
 	private FileOutputStream outputStream;
@@ -55,14 +55,14 @@ public class FeaturesConstructor{
 		atts = new ArrayList<Attribute>();// set up attributes
 		char[] labels = {'x','y','z'};
 		for (char e: labels){	     // - numeric
-		atts.add(new Attribute("avg_"+e));
-		atts.add(new Attribute("std_"+e));
-		atts.add(new Attribute("avgAbsDiff_"+e));
-		atts.add(new Attribute("avgRlstAccel_"+e));
-		atts.add(new Attribute("timePeaks_"+e));
-//		for (int i=1;i<=BIN_SIZE;i++){
-//			atts.add(new Attribute("binDist_"+e+i));
-//			}
+			atts.add(new Attribute("avg_"+e));
+			atts.add(new Attribute("std_"+e));
+			atts.add(new Attribute("avgAbsDiff_"+e));
+			atts.add(new Attribute("avgRlstAccel_"+e));
+			atts.add(new Attribute("timePeaks_"+e));
+			for (int i=1;i<=BIN_SIZE;i++){
+				atts.add(new Attribute("binDist_"+e+i));
+			}
 		}
 		
 		// Declare the class attribute along with its values
@@ -81,32 +81,35 @@ public class FeaturesConstructor{
 			double[] avgAbsDiff = feature.getAvgAbsDiff();
 			double avgRlstAccel = feature.getAvgRlstAccel();
 			double[] timePeaks = feature.getTimePeaks();
-//			double[] binDist = feature.getBinDist();
-//			for (int i=0;i<2;i++){ //There are in total x,y,z 3 datapoints
+			double[] binDist = feature.getBinDist();
 			for (int i=0;i<3;i++){ //There are in total x,y,z 3 datapoints
-				vals[i*5] = avg[i];
-				vals[i*5+1] = std[i];
-				vals[i*5+2] = avgAbsDiff[i];
-				vals[i*5+3] = avgRlstAccel;
-				vals[i*5+4] = timePeaks[i];
-//				for (int j=0;j<BIN_SIZE*3;j++){
-//					if(j>=0 && j<=9)
-//						vals[5+j] = binDist[j];
-//					else if(j>=10 && j<=19)
-//						vals[10+j] = binDist[j];
-//					else
-//						vals[15+j] = binDist[j];
-//					//Log.d(DEBUG_TAG,"The binDist["+j+"] = " + binDist[j]);
-//				}
+				vals[i*15] = avg[i];
+				vals[i*15+1] = std[i];
+				vals[i*15+2] = avgAbsDiff[i];
+				vals[i*15+3] = avgRlstAccel;
+				vals[i*15+4] = timePeaks[i];
+				for (int j=0;j<BIN_SIZE*3;j++){
+					if(j>=0 && j<=9)
+						vals[5+j] = binDist[j];
+					else if(j>=10 && j<=19)
+						vals[10+j] = binDist[j];
+					else
+						vals[15+j] = binDist[j];
+					//Log.d(DEBUG_TAG,"The binDist["+j+"] = " + binDist[j]);
+				}
 			}
 			//The last attribute is the class running/walking.
 			vals[data.numAttributes()-1] = data.attribute(data.numAttributes()-1).addStringValue(mode);
 			data.add(new DenseInstance(1.0, vals));
 		}
+//		data.instance(4).setWeight(2);
+//		data.instance(9).setWeight(2);
+//		data.instance(14).setWeight(2);
+		Log.d(DEBUG_TAG,"number of instances"+data.numInstances());
 	    return data;
 	}
 	
-	public void constructFeatures(String mode) throws Exception{
+	public void constructFeatures(String mode,boolean test,boolean algo) throws Exception{
 		if(mode.equals("running"))
 			outputStream = mContext.openFileOutput(runningFileName, Context.MODE_PRIVATE);
 		if(mode.equals("walking"))
@@ -124,6 +127,7 @@ public class FeaturesConstructor{
 		long endTime = mCursor.getLong(4);
 		//Hashtable<Long, Float> ht = new Hashtable<Long, Float>();	
 		
+		FileOutputStream os = mContext.openFileOutput("sensordata", Context.MODE_PRIVATE);
 		while(!mCursor.isAfterLast()){
 			
 			timeSt = mCursor.getLong(4);
@@ -131,10 +135,15 @@ public class FeaturesConstructor{
 			//ht.put(timeSt, mCursor.getFloat(1));
 			accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
 					mCursor.getFloat(3),timeSt));
+			
+			String tt = ""+timeSt+" "+mCursor.getFloat(1)+" "+mCursor.getFloat(2)+" "+mCursor.getFloat(3);
+			os.write(tt.getBytes());
+			os.write("\n".getBytes());
 //			Log.d(DEBUG_TAG,"time is "+timeSt+"x is "+mCursor.getFloat(1)+" "+mCursor.getFloat(2)+" "+mCursor.getFloat(3));
 			//}
 			mCursor.moveToNext();
 		}
+		os.close();
 		Log.d(DEBUG_TAG,"time interval is "+(endTime-timeSt));
 		mCursor.close();
 		/*String debug="Sample Data";
@@ -195,22 +204,30 @@ public class FeaturesConstructor{
 			br.close();
 			outputStream.close();
 			/* generate classifier*/
-//			String[] options = new String[4];
-//			options[0] = "-t";
-//			options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-//			options[2] = "-d";
-//			options[3] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
-//			Log.d(DEBUG_TAG,options[1]);
-//			Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
-			
-			String[] options = new String[5];
-			options[0] = "-l";
-			options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
-			options[2] = "-T";
-			options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-			options[4] = "-o";
-			Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
-			
+			if(test==false){
+				String[] options = new String[4];
+				options[0] = "-t";
+				options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+				options[2] = "-d";
+				options[3] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
+				Log.d(DEBUG_TAG,options[1]);
+				if(algo==true)
+					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
+				else
+					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
+			}
+			else{
+				String[] options = new String[5];
+				options[0] = "-l";
+				options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
+				options[2] = "-T";
+				options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+				options[4] = "-o";
+				if(algo==true)
+					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
+				else
+					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
+			}
 		}
 		
 		/* We don't need the data for calibration*/

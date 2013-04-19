@@ -10,9 +10,28 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="50dp"
-        android:text="03:00"
         android:textColor="#00C2FF"
         android:textSize="15pt" />
+
+
+     <ToggleButton
+         android:id="@+id/Test"
+         android:layout_width="150dp"
+         android:layout_height="40dp"
+         android:layout_marginTop="19dp"
+         android:layout_gravity="center_horizontal"
+         android:checked="false"
+         android:textOff="@string/button_test"
+         android:textOn="@string/button_test" />
+     <ToggleButton
+         android:id="@+id/Algo"
+         android:layout_width="150dp"
+         android:layout_height="40dp"
+         android:layout_marginTop="19dp"
+         android:checked="false"
+         android:layout_gravity="center_horizontal"
+         android:textOff="@string/button_algo"
+         android:textOn="@string/button_algo" />
 
     <Button
         android:id="@+id/start_button"

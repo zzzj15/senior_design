@@ -19,6 +19,8 @@
     <string name="female">Female</string>
     <string name="height">Height</string>
     <string name="weight">Weight</string>
+    <string name="button_test">Test</string>
+    <string name="button_algo">J48</string>
     <string name="toggle_turn_on">Male</string>
     <string name="toggle_turn_off">Female</string>
     <string name="Cancel">Cancel</string>
