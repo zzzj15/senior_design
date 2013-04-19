@@ -9,6 +9,7 @@ import java.util.List;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
+import weka.classifiers.bayes.NaiveBayes;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
@@ -36,7 +37,7 @@ public class FeaturesConstructor{
 	private List<Acceleration> accelerations = new ArrayList<Acceleration>();
 	private SQLiteDatabase mDb;
 	private Context mContext;
-	private int SAMPLE_SIZE = 1000;
+	private int SAMPLE_SIZE = 1000; //1000 works but not many sets of data will be generated
 	private final int BIN_SIZE = 10;  
 	private Cursor mCursor;
 	private FileOutputStream outputStream;
@@ -59,9 +60,9 @@ public class FeaturesConstructor{
 		atts.add(new Attribute("avgAbsDiff_"+e));
 		atts.add(new Attribute("avgRlstAccel_"+e));
 		atts.add(new Attribute("timePeaks_"+e));
-		for (int i=1;i<=BIN_SIZE;i++){
-			atts.add(new Attribute("binDist_"+e+i));
-			}
+//		for (int i=1;i<=BIN_SIZE;i++){
+//			atts.add(new Attribute("binDist_"+e+i));
+//			}
 		}
 		
 		// Declare the class attribute along with its values
@@ -80,23 +81,23 @@ public class FeaturesConstructor{
 			double[] avgAbsDiff = feature.getAvgAbsDiff();
 			double avgRlstAccel = feature.getAvgRlstAccel();
 			double[] timePeaks = feature.getTimePeaks();
-			double[] binDist = feature.getBinDist();
+//			double[] binDist = feature.getBinDist();
 //			for (int i=0;i<2;i++){ //There are in total x,y,z 3 datapoints
 			for (int i=0;i<3;i++){ //There are in total x,y,z 3 datapoints
-				vals[i*15] = avg[i];
-				vals[i*15+1] = std[i];
-				vals[i*15+2] = avgAbsDiff[i];
-				vals[i*15+3] = avgRlstAccel;
-				vals[i*15+4] = timePeaks[i];
-				for (int j=0;j<BIN_SIZE*3;j++){
-					if(j>=0 && j<=9)
-						vals[5+j] = binDist[j];
-					else if(j>=10 && j<=19)
-						vals[10+j] = binDist[j];
-					else
-						vals[15+j] = binDist[j];
-					//Log.d(DEBUG_TAG,"The binDist["+j+"] = " + binDist[j]);
-				}
+				vals[i*5] = avg[i];
+				vals[i*5+1] = std[i];
+				vals[i*5+2] = avgAbsDiff[i];
+				vals[i*5+3] = avgRlstAccel;
+				vals[i*5+4] = timePeaks[i];
+//				for (int j=0;j<BIN_SIZE*3;j++){
+//					if(j>=0 && j<=9)
+//						vals[5+j] = binDist[j];
+//					else if(j>=10 && j<=19)
+//						vals[10+j] = binDist[j];
+//					else
+//						vals[15+j] = binDist[j];
+//					//Log.d(DEBUG_TAG,"The binDist["+j+"] = " + binDist[j]);
+//				}
 			}
 			//The last attribute is the class running/walking.
 			vals[data.numAttributes()-1] = data.attribute(data.numAttributes()-1).addStringValue(mode);
@@ -194,19 +195,22 @@ public class FeaturesConstructor{
 			br.close();
 			outputStream.close();
 			/* generate classifier*/
-			String[] options = new String[4];
-			options[0] = "-t";
-			options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-			options[2] = "-d";
-			options[3] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
-			Log.d(DEBUG_TAG,options[1]);
-			Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
+//			String[] options = new String[4];
+//			options[0] = "-t";
+//			options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+//			options[2] = "-d";
+//			options[3] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
+//			Log.d(DEBUG_TAG,options[1]);
+//			Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
 			
-//			options[0] = "-l";
-//			options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
-//			options[2] = "-T";
-//			options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-//			Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
+			String[] options = new String[5];
+			options[0] = "-l";
+			options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
+			options[2] = "-T";
+			options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+			options[4] = "-o";
+			Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
+			
 		}
 		
 		/* We don't need the data for calibration*/

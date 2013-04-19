@@ -160,9 +160,9 @@ public class Feature {
 			zthres = 1;
 		else
 			zthres = statsZ.getMax()-statsZ.getMin();
-		timePeaks[0] = peakDet(accelerations,'x',0.15*xthres);//15% of the full range as threshold
-		timePeaks[1] =peakDet(accelerations,'y',0.15*ythres);
-		timePeaks[2] =peakDet(accelerations,'z',0.15*zthres);
+		timePeaks[0] = peakDet(accelerations,'x',0.5*xthres);//50% of the full range as threshold
+		timePeaks[1] =peakDet(accelerations,'y',0.5*ythres);
+		timePeaks[2] =peakDet(accelerations,'z',0.5*zthres);
 		return timePeaks;
 		
 	}
@@ -216,7 +216,7 @@ public class Feature {
 				maxAccel = v;
 			}
 			if (lookForMax){
-				if (vx < mx-threshold){
+				if (vx < mx-threshold){ //point < max - threshold
 					maxTab.add(maxAccel);
 //					Log.d(DEBUG_TAG,"max accel is x" + maxAccel.getX()+"max accel y is"+maxAccel.getY()+" max accel z is"+maxAccel.getZ());
 					mn = vx;
@@ -224,7 +224,7 @@ public class Feature {
 				}
 			}
 			else{
-				if (vx > mn+threshold){
+				if (vx > mn+threshold){ // point > min + threshold
 					mx = vx;
 					lookForMax = true;
 				}
@@ -240,6 +240,7 @@ public class Feature {
 			long diffSum=0;
 			int count=0;
 			Acceleration prev=maxTab.get(0);
+			Log.d(DEBUG_TAG,"start time"+prev.getTimestamp());
 			for(Acceleration cur : maxTab){
 				diffSum +=cur.getTimestamp()-prev.getTimestamp();
 				count++;
@@ -247,6 +248,7 @@ public class Feature {
 //				Log.d(DEBUG_TAG,"cur x is "+cur.getX()+"prev x is "+prev.getX());
 				prev = cur;
 			}
+			Log.d(DEBUG_TAG,"end time"+prev.getTimestamp());
 //			
 //			Iterator<Acceleration> iterator = maxTab.iterator();
 //			Acceleration cur,prev;

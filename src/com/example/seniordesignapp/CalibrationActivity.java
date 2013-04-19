@@ -40,7 +40,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	private SQLiteDatabase mDb;
 	private List<SensorEvent> sensorEvents;
 	
-	private final int countdownPeriod = 180; //3 Minutes
+	private final int countdownPeriod = 30; //3 Minutes
 	
 	private TextView mCountdownTv;
 	private Button mStartButton;
@@ -99,7 +99,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		/*Register the Sensor Listener */
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		mSensor = (Sensor) mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_NORMAL);
+		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_FASTEST);
 		mMode = getIntent().getExtras().getString("mode");
 	}
 	@Override
@@ -160,7 +160,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
         mXSeries.addLast(null, sensorEvent.values[0]);
         mYSeries.addLast(null, sensorEvent.values[1]);
         mZSeries.addLast(null, sensorEvent.values[2]);
-        long curTime = System.currentTimeMillis();
+        long curTime = System.nanoTime();
         timeStamps.add(curTime);
 //        Log.d(DEBUG_TAG,"adding sensor event "+count+ " at "+curTime);
         sensorEvents.add(sensorEvent);
