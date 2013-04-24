@@ -2,8 +2,10 @@ package com.example.seniordesignapp;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +53,8 @@ public class FeaturesConstructor{
 		mContext = context;
 		mDb = new DatabaseHelper(mContext).getWritableDatabase();
 	}
-	private Instances constructArff(List<Feature> features,String mode){
+	
+	private Instances constructInstances(List<Feature> features,String mode,boolean isCalibration){
 		atts = new ArrayList<Attribute>();// set up attributes
 		char[] labels = {'x','y','z'};
 		for (char e: labels){	     // - numeric
@@ -66,12 +69,7 @@ public class FeaturesConstructor{
 		}
 		
 		// Declare the class attribute along with its values
-//		List<String> classVal = new ArrayList<String>();
-//		classVal.add("running");
-//		classVal.add("walking");
 		atts.add(new Attribute("class",(ArrayList<String>) null)); // - string
-//		atts.add(new Attribute("class",classVal)); // - string
-		
 		data = new Instances("activity", atts, 0);
 		
 		for (Feature feature:features){
@@ -95,21 +93,46 @@ public class FeaturesConstructor{
 						vals[10+j] = binDist[j];
 					else
 						vals[15+j] = binDist[j];
-					//Log.d(DEBUG_TAG,"The binDist["+j+"] = " + binDist[j]);
 				}
 			}
-			//The last attribute is the class running/walking.
-			vals[data.numAttributes()-1] = data.attribute(data.numAttributes()-1).addStringValue(mode);
+			if(isCalibration) //The last attribute is the class running/walking.
+				vals[data.numAttributes()-1] = data.attribute(data.numAttributes()-1).addStringValue(mode);
 			data.add(new DenseInstance(1.0, vals));
 		}
-//		data.instance(4).setWeight(2);
-//		data.instance(9).setWeight(2);
-//		data.instance(14).setWeight(2);
-		Log.d(DEBUG_TAG,"number of instances"+data.numInstances());
+		
+		data.attribute(4).setWeight(10); // more weight for period
+		data.attribute(19).setWeight(10);
+		data.attribute(34).setWeight(10);
 	    return data;
 	}
 	
-	public void constructFeatures(String mode,boolean test,boolean algo) throws Exception{
+	private void retrieveSensorData() throws IOException{ //retrieve sensor data from database
+		mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
+				+" ORDER BY timestamp ASC",null);
+		Log.d(DEBUG_TAG,"number of points returned from database "+mCursor.getCount());
+		mCursor.moveToFirst();
+		long timeSt=0;
+		long endTime = mCursor.getLong(4);
+//		FileOutputStream os = mContext.openFileOutput("sensordata", Context.MODE_PRIVATE);
+		while(!mCursor.isAfterLast()){
+			timeSt = mCursor.getLong(4);
+			accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
+					mCursor.getFloat(3),timeSt));
+//				String tt = ""+timeSt+" "+mCursor.getFloat(1)+" "+mCursor.getFloat(2)+" "+mCursor.getFloat(3);
+//				os.write(tt.getBytes());
+//				os.write("\n".getBytes());
+			mCursor.moveToNext();
+		}
+//		os.close();
+		Log.d(DEBUG_TAG,"time interval is "+(endTime-timeSt));
+		mCursor.close();
+	}
+	public Instances constructFeature(List<Acceleration> x){//returns constructed features without class
+		features.add(new Feature(x));
+		Instances data = constructInstances(features,"",false); //mode is not required when class is not necessary
+		return data;
+	}
+	public void constructFeatures(String mode,boolean test,boolean algo,boolean isCalibration) throws Exception{
 		if(mode.equals("running"))
 			outputStream = mContext.openFileOutput(runningFileName, Context.MODE_PRIVATE);
 		if(mode.equals("walking"))
@@ -118,47 +141,14 @@ public class FeaturesConstructor{
 			outputStream = mContext.openFileOutput(sittingFileName, Context.MODE_PRIVATE);
 		
 		/* Get the just-recorded accelerations from db and construct a feature from every 200 datapoints*/
-		
-		mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
-				+" ORDER BY timestamp ASC",null);
-		Log.d(DEBUG_TAG,"number of points returned from database "+mCursor.getCount());
-		mCursor.moveToFirst();
-		long timeSt=0;
-		long endTime = mCursor.getLong(4);
-		//Hashtable<Long, Float> ht = new Hashtable<Long, Float>();	
-		
-		FileOutputStream os = mContext.openFileOutput("sensordata", Context.MODE_PRIVATE);
-		while(!mCursor.isAfterLast()){
-			
-			timeSt = mCursor.getLong(4);
-			//if(!ht.containsKey(timeSt)){
-			//ht.put(timeSt, mCursor.getFloat(1));
-			accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
-					mCursor.getFloat(3),timeSt));
-			
-			String tt = ""+timeSt+" "+mCursor.getFloat(1)+" "+mCursor.getFloat(2)+" "+mCursor.getFloat(3);
-			os.write(tt.getBytes());
-			os.write("\n".getBytes());
-//			Log.d(DEBUG_TAG,"time is "+timeSt+"x is "+mCursor.getFloat(1)+" "+mCursor.getFloat(2)+" "+mCursor.getFloat(3));
-			//}
-			mCursor.moveToNext();
-		}
-		os.close();
-		Log.d(DEBUG_TAG,"time interval is "+(endTime-timeSt));
-		mCursor.close();
-		/*String debug="Sample Data";
-		for (Acceleration e:accelerations){
-			debug = debug+String.valueOf(e.getX());
-		}
-		Log.d(DEBUG_TAG,debug);*/
+		retrieveSensorData();
 		for (int i =0;i<accelerations.size()/SAMPLE_SIZE;i++){
 			List<Acceleration> samples = accelerations.subList(i*SAMPLE_SIZE, SAMPLE_SIZE*(i+1)-1);
 			features.add(new Feature(samples));
 		}
-		Instances data = constructArff(features,mode);
+		Instances data = constructInstances(features,mode,isCalibration);
 		outputStream.write(data.toString().getBytes());
 		outputStream.close();
-		
 		
 		File rfile = mContext.getFileStreamPath(runningFileName);
 		File wfile = mContext.getFileStreamPath(walkingFileName);
@@ -205,6 +195,7 @@ public class FeaturesConstructor{
 			outputStream.close();
 			/* generate classifier*/
 			if(test==false){
+				Log.d(DEBUG_TAG,"Training!");
 				String[] options = new String[4];
 				options[0] = "-t";
 				options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
@@ -217,16 +208,25 @@ public class FeaturesConstructor{
 					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
 			}
 			else{
-				String[] options = new String[5];
-				options[0] = "-l";
-				options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
-				options[2] = "-T";
-				options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-				options[4] = "-o";
-				if(algo==true)
+				Log.d(DEBUG_TAG,"Testing!");
+				
+				if(algo==true){
+					String[] options = new String[4];
+					options[0] = "-l";
+					options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
+					options[2] = "-T";
+					options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
 					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
-				else
+				}
+				else{
+					String[] options = new String[5];
+					options[0] = "-l";
+					options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
+					options[2] = "-T";
+					options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+					options[4] = "-o";
 					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
+				}
 			}
 		}
 		

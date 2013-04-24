@@ -231,7 +231,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		@Override
 		protected Void doInBackground(String... arg0) {
 			try {
-				new FeaturesConstructor(getApplicationContext()).constructFeatures(arg0[0],mTest,mAlgo);
+				new FeaturesConstructor(getApplicationContext()).constructFeatures(arg0[0],mTest,mAlgo,true);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
