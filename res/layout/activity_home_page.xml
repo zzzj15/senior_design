@@ -2,7 +2,9 @@
     xmlns:atswidget="http://schemas.android.com/apk/res/com.example.seniordesignapp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:background="@drawable/app_bg"
+    android:orientation="vertical"
+    android:tileMode="repeat" >
 
     <RelativeLayout
         android:id="@+id/top_view"
@@ -78,9 +80,22 @@
         atswidget:totalNotches="120"
         atswidget:unitTitle=""
         atswidget:upperTitle="" /-->
-	 <!--/RelativeLayout --> 
+	 <!--/RelativeLayout -->
 	 
-    
+
+	 <TextView
+	     android:id="@+id/textView1"
+	     android:layout_width="wrap_content"
+	     android:layout_height="wrap_content"
+	     android:text="Total Daily GL"
+	     android:textAppearance="?android:attr/textAppearanceLarge" />
+
+	 <TextView
+	     android:id="@+id/textView2"
+	     android:layout_width="wrap_content"
+	     android:layout_height="wrap_content"
+	     android:text="0"
+	     android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <View
         android:id="@+id/Divider"

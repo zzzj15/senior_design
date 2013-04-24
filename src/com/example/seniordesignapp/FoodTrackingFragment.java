@@ -423,12 +423,12 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		
 		// Display on the list
 		ArrayList<String> sData = new ArrayList<String>();
-		 sql = "SELECT food_name, COUNT(food_name), distance"
+		 sql = "SELECT food_name, COUNT(food_name), distance, GL"
 				+ " FROM FoodGPS WHERE food_name NOT NULL"
 				+ " GROUP BY food_name" + " ORDER BY COUNT(food_name) DESC"
 				+ " LIMIT 5";
 		 
-		 sql = "SELECT food_name, distance FROM (" + sql + ") ORDER BY distance DESC";
+		 sql = "SELECT food_name, distance, GL FROM (" + sql + ") ORDER BY distance DESC";
 		mCursor = mDb.rawQuery(sql, null);
 
 		if (mCursor.getCount() > 0) { // now it is taking the first match WIP
@@ -696,8 +696,8 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	            	  //lat = 5.2;
 	            	  //Get the position of user's selection
 	            	  int pos = mlv.getCheckedItemPosition();
-	            	  int spinner_pos =  spin_amount.getSelectedItemPosition();
-	            	  
+	            	 int spinner_pos =  spin_amount.getSelectedItemPosition();
+	            	 
 //	            	ArrayList<Integer> foodIDs = new ArrayList<Integer>();
 	            	ArrayList<Integer> GLs = new ArrayList<Integer>();
 	            	if(isValid){

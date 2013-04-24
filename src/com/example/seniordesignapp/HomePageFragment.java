@@ -31,6 +31,7 @@ public class HomePageFragment extends Fragment {
 	ExpandableListView lv;
 	ToggleButton tButton;
     private DatabaseHelper mDbHelper;
+    private TextView TotalGL;
     private SQLiteDatabase mDb;
     private Cursor mCursor;
     private static String TAG = "HomePageFramentDynamicLog";
@@ -301,7 +302,20 @@ public class HomePageFragment extends Fragment {
 
 		LinearLayout mlinearLayout = (LinearLayout) inflater.inflate(
 				R.layout.activity_home_page, container, false);
-
+		
+		TotalGL = (TextView) mlinearLayout.findViewById(R.id.textView2);
+		
+	
+	//String tempGl=mCursor.getString(mCursor.getColumnIndex("GPS_time"));
+		String sql = "SELECT SUM(GL) AS TotalGL FROM foodGPS";
+		mDbHelper = new DatabaseHelper(getActivity());
+			mDb = mDbHelper.getWritableDatabase();
+		mCursor = mDb.rawQuery(sql,null);
+		mCursor.moveToFirst();	
+		String tempGl=mCursor.getString(mCursor.getColumnIndex("TotalGL"));
+		TotalGL.setText(tempGl);
+		TotalGL.setTextColor(-16711681);
+		//TotalGL.setText(temporaryGL);
 		//meter = (Gauge) mlinearLayout.findViewById(R.id.meter);
 		//meter.setValue(30);
 		
