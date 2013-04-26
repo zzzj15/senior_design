@@ -26,6 +26,10 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.PopupWindow;
 
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshExpandableListView;
+
 public class HomePageFragment extends Fragment {
 
 	ExpandableListView lv;
@@ -314,7 +318,7 @@ public class HomePageFragment extends Fragment {
 		mCursor.moveToFirst();	
 		String tempGl=mCursor.getString(mCursor.getColumnIndex("TotalGL"));
 		TotalGL.setText(tempGl);
-		TotalGL.setTextColor(-16711681);
+		//TotalGL.setTextColor(-16711681);
 		//TotalGL.setText(temporaryGL);
 		//meter = (Gauge) mlinearLayout.findViewById(R.id.meter);
 		//meter.setValue(30);
