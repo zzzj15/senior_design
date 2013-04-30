@@ -60,18 +60,43 @@ public class Feature {
 	 * @param accelerations A list of accelerations retrived 
 	 */
 	public Feature(List<Acceleration> accelerations){
+		
 		DescriptiveStatistics statsX = new DescriptiveStatistics();
 		DescriptiveStatistics statsY = new DescriptiveStatistics();
 		DescriptiveStatistics statsZ = new DescriptiveStatistics();
-		for (Acceleration e:accelerations){
-			statsX.addValue(e.getX());
-			statsY.addValue(e.getY());
-			statsZ.addValue(e.getZ());
-		}
-		//Calculate Average
-		average[0] = statsX.getMean();
-		average[1] = statsY.getMean();
-		average[2] = statsZ.getMean();
+//		for (Acceleration e:accelerations){
+//			statsX.addValue(e.getX());
+//			statsY.addValue(e.getY());
+//			statsZ.addValue(e.getZ());
+//		}
+//		
+//		//Transform the accelerations data into vertical and horizontal
+//		/*Step 1
+//			Calculate Average*/
+//		average[0] = statsX.getMean();
+//		average[1] = statsY.getMean();
+//		average[2] = statsZ.getMean();
+//		/*Step 2
+//			unit vector*/
+//		double mag = Math.sqrt(average[0]*average[0]+average[1]*average[1]+average[2]*average[2]);
+//		double[] unitG = {average[0]/mag,average[1]/mag,average[2]/mag};
+//		/*Step 3
+//		 * remove from the frame by subtracting G*/
+//		for (Acceleration e:accelerations){
+//			e.setX(e.getX()-average[0]);
+//			e.setY(e.getY()-average[1]);
+//			e.setZ(e.getZ()-average[2]);
+//		}
+//		/*Step 4
+//		 * calculate the signed length of the component of each vector
+//		 */
+//		
+//		for (Acceleration e:accelerations){
+//			double[] a = {e.getX(),e.getY(),e.getZ()};
+//			double v = -dotProduct(a,unitG);
+//			
+//		}
+		
 		//Calculate Standard Deviation
 		std[0] = statsX.getStandardDeviation();
 		std[1] = statsY.getStandardDeviation();
@@ -148,15 +173,15 @@ public class Feature {
 //		timePeaks[1] =peakDet(accelerations,'y',0.05);
 //		timePeaks[2] =peakDet(accelerations,'z',0.05);
 		double xthres=0,ythres=0,zthres=0;
-		if(statsX.getMax()-statsX.getMin()<0.03)
+		if(statsX.getMax()-statsX.getMin()<0.7)
 			xthres = 1;
 		else
 			xthres = statsX.getMax()-statsX.getMin();
-		if(statsY.getMax()-statsY.getMin()<0.03)
+		if(statsY.getMax()-statsY.getMin()<0.7)
 			ythres = 1;
 		else
 			ythres = statsY.getMax()-statsY.getMin();
-		if(statsZ.getMax()-statsZ.getMin()<0.03)
+		if(statsZ.getMax()-statsZ.getMin()<0.7)
 			zthres = 1;
 		else
 			zthres = statsZ.getMax()-statsZ.getMin();
@@ -183,6 +208,12 @@ public class Feature {
 			}
 			//Log.d(DEBUG_TAG,"Freqency "+i+" = "+binDist[i-1]);
 		}
+	}
+	private double dotProduct(double[] x,double[] y){
+		double sum = 0.0;
+		for(int i=0;i<x.length;i++)
+			sum += x[i]*y[i];
+		return sum;
 	}
 	private double peakDet(List<Acceleration> accelerations,char pos, double threshold){
 		double mn = Double.MAX_VALUE;

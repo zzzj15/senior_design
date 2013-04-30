@@ -54,6 +54,31 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	private ArrayList<Float> xSensorData,ySensorData,zSensorData;
 	private boolean mTest,mAlgo;
 	
+	private void finishTransaction(){
+		 mSensorManager.unregisterListener(this);
+//	        finish();
+	        mDb.beginTransaction();
+			try{
+//				int i=0;
+//				for (SensorEvent e: sensorEvents){
+//					mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
+//							+", "+ e.values[1] + ", " + e.values[2] + ", " + timeStamps.get(i)+ " );");
+//					i++;
+//				}
+				for (int i=0;i<timeStamps.size();i++){
+					mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +"(xAxis,yAxis,zAxis,timestamp)" +" VALUES ( "+ xSensorData.get(i)
+							+", "+ ySensorData.get(i) + ", " + zSensorData.get(i) + ", " + timeStamps.get(i)+ " );");
+				}
+				mDb.setTransactionSuccessful();
+				timeStamps = new ArrayList<Long>();
+			}
+			finally{
+				mDb.endTransaction();
+				mDbHelper.close();
+				new FeaturesTask().execute(mMode);
+			}
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -145,28 +170,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
     protected void onStop() {
         super.onStop();
         // unregister with the orientation sensor before exiting:
-        mSensorManager.unregisterListener(this);
-        finish();
-        mDb.beginTransaction();
-		try{
-//			int i=0;
-//			for (SensorEvent e: sensorEvents){
-//				mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ e.values[0]
-//						+", "+ e.values[1] + ", " + e.values[2] + ", " + timeStamps.get(i)+ " );");
-//				i++;
-//			}
-			for (int i=0;i<timeStamps.size();i++){
-				mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ xSensorData.get(i)
-						+", "+ ySensorData.get(i) + ", " + zSensorData.get(i) + ", " + timeStamps.get(i)+ " );");
-			}
-			mDb.setTransactionSuccessful();
-			timeStamps = new ArrayList<Long>();
-		}
-		finally{
-			mDb.endTransaction();
-			mDbHelper.close();
-			new FeaturesTask().execute(mMode);
-		}
+//        finishTransaction();
     }
 	@Override
 	public synchronized void onSensorChanged(SensorEvent sensorEvent) {        // update instantaneous data:
@@ -225,6 +229,8 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 			mIsCountdown=false;
 			mCountdown = null;
 			mStartButton.setEnabled(true); 
+			//unregister sensor manager and finish db transaction
+			finishTransaction();
 	     }	
 	}
 	private class FeaturesTask extends AsyncTask<String,Void,Void>{

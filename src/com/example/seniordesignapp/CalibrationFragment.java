@@ -28,6 +28,7 @@ public class CalibrationFragment extends Fragment {
 		Button runningButton = (Button) mRelativeLayout.findViewById(R.id.calibration_running);
 		Button walkingButton = (Button) mRelativeLayout.findViewById(R.id.calibration_walking);
 		Button sittingButton = (Button) mRelativeLayout.findViewById(R.id.calibration_sitting);
+		Button testingButton = (Button) mRelativeLayout.findViewById(R.id.calibration_testing);
 		runningButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -49,6 +50,14 @@ public class CalibrationFragment extends Fragment {
 			public void onClick(View v) {
 				Intent intent = new Intent(getActivity(), CalibrationActivity.class);
 				intent.putExtra("mode", "sitting");
+	            getActivity().startActivity(intent);
+			}
+		});
+		testingButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(getActivity(), TestingActivity.class);
+//				intent.putExtra("mode", "sitting");
 	            getActivity().startActivity(intent);
 			}
 		});

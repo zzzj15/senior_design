@@ -36,7 +36,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Sit"
+        android:text="Sit/Stand"
+        android:layout_weight="1.0"/>
+         <Button
+        android:id="@+id/calibration_testing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Testing"
         android:layout_weight="1.0"/>
 
 
