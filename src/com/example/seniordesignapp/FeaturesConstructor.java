@@ -2,7 +2,6 @@ package com.example.seniordesignapp;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -43,18 +42,15 @@ public class FeaturesConstructor{
 	private final int BIN_SIZE = 10;  
 	private Cursor mCursor;
 	private FileOutputStream outputStream;
-	private String runningFileName = "activity_classification_running.arff";
-	private String walkingFileName = "activity_classification_walking.arff";
-	private String sittingFileName = "activity_classification_sitting.arff";
 	private String fileName = "activity_classification.arff";
-	private String classfierFileName = "classifier";
+	private String classifierFileName = "classifier";
 	
 	public FeaturesConstructor(Context context){
 		mContext = context;
 		mDb = new DatabaseHelper(mContext).getWritableDatabase();
 	}
 	
-	private Instances constructInstances(List<Feature> features,String mode,boolean isCalibration){
+	private Instances constructInstances(List<Feature> features,String mode,boolean isCalibration,int Position){
 		atts = new ArrayList<Attribute>();// set up attributes
 		char[] labels = {'x','y','z'};
 		for (char e: labels){	     // - numeric
@@ -108,8 +104,10 @@ public class FeaturesConstructor{
 //				}
 			}
 			vals[data.numAttributes()-2]=(timePeaks[0]+timePeaks[1]+timePeaks[2])/3; //hardcoded for now
-			if(isCalibration) //The last attribute is the class running/walking.
-				vals[data.numAttributes()-1] = data.attribute(data.numAttributes()-1).addStringValue(mode);
+			if(isCalibration){ //The last attribute is the class running/walking.
+				String m = getName(Position,mode);
+				vals[data.numAttributes()-1] = data.attribute(data.numAttributes()-1).addStringValue(m);
+			}
 			data.add(new DenseInstance(1.0, vals));
 		}
 		data.attribute(data.numAttributes()-2).setWeight(2.0);
@@ -118,192 +116,201 @@ public class FeaturesConstructor{
 //		data.attribute(34).setWeight(10);
 	    return data;
 	}
-	
-	private void retrieveSensorData(int mode) throws IOException{ //retrieve sensor data from database
-		if(mode == 0){ //retrieve all data from database, when data is not mixed
+	private String getName(int position,String mode){
+		String temp = mode.substring(0, 1)+position;
+		return temp;
+	}
+	private int retrieveSensorData(String mode,int Position) throws IOException{ //retrieve sensor data from database
+		int ret=0;																	//returns 1 if query result is nonempty
+		if(mode == ""){ //retrieve all data from database, when data is not mixed
 			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
 					+" ORDER BY timestamp ASC",null);
 		}
-		else if(mode ==1){//retrieve running data
-			Log.d(DEBUG_TAG,"mode is running");
+		else{
 			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
-					+" WHERE class like '%running%' ORDER BY timestamp ASC",null);
+					+" WHERE class like '%"+mode+"%' AND position = "+Position+ " ORDER BY timestamp ASC",null);
 		}
-		else if(mode ==2){//retrieve walking data
-			Log.d(DEBUG_TAG,"mode is walking");
-			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
-					+" WHERE class like '%walking%' ORDER BY timestamp ASC",null);
+
+		if(mCursor.getCount()>0){
+			Log.d(DEBUG_TAG,"number of points returned from database "+mCursor.getCount());
+			mCursor.moveToFirst();
+			long timeSt=0;
+			long endTime = mCursor.getLong(4);
+			while(!mCursor.isAfterLast()){
+				timeSt = mCursor.getLong(4);
+				accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
+						mCursor.getFloat(3),timeSt));
+				mCursor.moveToNext();
+			}
+			Log.d(DEBUG_TAG,"time interval is "+(endTime-timeSt));
+			ret = 1;
 		}
-		else if(mode ==3){//retrieve sitting data
-			Log.d(DEBUG_TAG,"mode is sitting");
-			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
-					+" WHERE class like '%sitting%' ORDER BY timestamp ASC",null);
-		}
-		Log.d(DEBUG_TAG,"number of points returned from database "+mCursor.getCount());
-		mCursor.moveToFirst();
-		long timeSt=0;
-		long endTime = mCursor.getLong(4);
-//		FileOutputStream os = mContext.openFileOutput("sensordata", Context.MODE_PRIVATE);
-		while(!mCursor.isAfterLast()){
-			timeSt = mCursor.getLong(4);
-			accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
-					mCursor.getFloat(3),timeSt));
-//				String tt = ""+timeSt+" "+mCursor.getFloat(1)+" "+mCursor.getFloat(2)+" "+mCursor.getFloat(3);
-//				os.write(tt.getBytes());
-//				os.write("\n".getBytes());
-			mCursor.moveToNext();
-		}
-//		os.close();
-		Log.d(DEBUG_TAG,"time interval is "+(endTime-timeSt));
 		mCursor.close();
+		return ret;
 	}
 	public Instances constructFeature(List<Acceleration> x){//returns constructed features without class
 		features.add(new Feature(x));
-		Instances data = constructInstances(features,"",false); //mode is not required when class is not necessary
+		Instances data = constructInstances(features,"",false,0); //mode is not required when class is not necessary
 		return data;
 	}
-	private void evaluateModel(boolean algo,boolean test) throws Exception{
-
-		File rfile = mContext.getFileStreamPath(runningFileName);
-		File wfile = mContext.getFileStreamPath(walkingFileName);
-		File sfile = mContext.getFileStreamPath(sittingFileName);
-		if(rfile.exists()&&wfile.exists()&&sfile.exists()){ //merge two files remove extra header and generate classifier
-			outputStream = mContext.openFileOutput(fileName, Context.MODE_PRIVATE);
-			BufferedReader br = new BufferedReader(new FileReader(rfile));
-			String sCurrentLine;
-			while ((sCurrentLine = br.readLine()) != null) {
-				if(sCurrentLine.equals("@attribute class string")){
-					outputStream.write("@attribute class {running,walking,sitting}".getBytes());
-					outputStream.write("\n".getBytes());
-				}
-				else{
-					outputStream.write(sCurrentLine.getBytes());
-					outputStream.write("\n".getBytes());
-				}
-			}
-			br.close();
-			//continue reading wfile
-			br = new BufferedReader(new FileReader(wfile));
-			boolean toWrite = false;
-			while ((sCurrentLine = br.readLine()) != null) {
-				if(toWrite){
-					outputStream.write(sCurrentLine.getBytes());
-					outputStream.write("\n".getBytes());
-				}
-				if(sCurrentLine.equals("@data"))
-					toWrite=true;
-			}
-			br.close();
-			//continue reading sfile
-			br = new BufferedReader(new FileReader(sfile));
-			toWrite = false;
-			while ((sCurrentLine = br.readLine()) != null) {
-				if(toWrite){
-					outputStream.write(sCurrentLine.getBytes());
-					outputStream.write("\n".getBytes());
-				}
-				if(sCurrentLine.equals("@data"))
-					toWrite=true;
-			}
-			br.close();
-			outputStream.close();
-			/* generate classifier*/
-			if(test==false){
-				Log.d(DEBUG_TAG,"Training!");
+	private String getPre(boolean test){
+		String pre; //decide the prefix for the output file
+		if(test)
+			pre = "test_";
+		else
+			pre = "activity_classification_";
+		return pre;
+	}
+	private void evaluateResult(boolean algo,boolean test,String fileName,String classifierFileName) throws Exception{
+		/* generate classifier*/
+		if(test==false){
+			Log.d(DEBUG_TAG,"Training!");
+			String[] options = new String[4];
+			options[0] = "-t";
+			options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+			options[2] = "-d";
+			options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
+			Log.d(DEBUG_TAG,options[1]);
+			if(algo==true)
+				Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
+			else
+				Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
+		}
+		else{
+			Log.d(DEBUG_TAG,"Testing!");
+			
+			if(algo==true){//J48
 				String[] options = new String[4];
-				options[0] = "-t";
-				options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-				options[2] = "-d";
-				options[3] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
-				Log.d(DEBUG_TAG,options[1]);
-				if(algo==true)
-					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
-				else
-					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
+				options[0] = "-l";
+				options[1] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
+				options[2] = "-T";
+				options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+				Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
 			}
 			else{
-				Log.d(DEBUG_TAG,"Testing!");
-				
-				if(algo==true){
-					String[] options = new String[4];
-					options[0] = "-l";
-					options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
-					options[2] = "-T";
-					options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new J48(), options));
-				}
-				else{
-					String[] options = new String[5];
-					options[0] = "-l";
-					options[1] = mContext.getFileStreamPath(classfierFileName).getAbsolutePath();
-					options[2] = "-T";
-					options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-					options[4] = "-o";
-					Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
-				}
+				String[] options = new String[5];
+				options[0] = "-l";
+				options[1] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
+				options[2] = "-T";
+				options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+				options[4] = "-o";
+				Log.d(DEBUG_TAG,Evaluation.evaluateModel(new NaiveBayes(), options));
 			}
 		}
 	}
-	public void constructFeatures(String mode,boolean test,boolean algo,boolean isCalibration) throws Exception{
-		if(mode.equals("running"))
-			outputStream = mContext.openFileOutput(runningFileName, Context.MODE_PRIVATE);
-		if(mode.equals("walking"))
-			outputStream = mContext.openFileOutput(walkingFileName, Context.MODE_PRIVATE);
-		if(mode.equals("sitting"))
-			outputStream = mContext.openFileOutput(sittingFileName, Context.MODE_PRIVATE);
+	private void constructFinalFile(boolean algo,boolean test ) throws Exception{
+		
+		String pre = getPre(test); //decide the prefix for the output file
+		
+		File[] fileArr = new File[12];
+		String[] filePre = {"r","w","s"};
+		String[] fName = new String[12];
+		for(int i=0;i<3;++i){
+			for(int j=0;j<4;++j){
+				fName[4*i+j] = pre+filePre[i]+j+".arff";
+				fileArr[4*i+j] = mContext.getFileStreamPath(fName[4*i+j]); //"activity_classification_r1.arff"
+			}
+		}
+		//check if all files exist
+		boolean allExist = true;
+		boolean[] fileExistArr = new boolean[12];
+		for(int i=0;i<12;i++){
+			allExist = allExist && fileArr[i].exists();
+			if(fileArr[i].exists()==false){
+				Log.d(DEBUG_TAG,fileArr[i].getName()+"DOES NOT EXIST");
+				fileExistArr[i]=false;
+			}
+			else
+				fileExistArr[i]=true;
+		}
+		if(allExist||test){	//construct final file if all files exist for calibration or in test mode
+			outputStream = mContext.openFileOutput(fileName, Context.MODE_PRIVATE);
+			BufferedReader br;
+			int startFileNum = 0;
+			if(!allExist){
+				 for(int i=0;i<12;i++){
+					 if(fileExistArr[i]==true){
+						startFileNum = i;
+						break;
+					 }
+				 }
+			}
+			br = new BufferedReader(new FileReader(fileArr[startFileNum]));
+			String sCurrentLine;
+			while ((sCurrentLine = br.readLine()) != null) {
+				if(sCurrentLine.equals("@attribute class string")){
+					//outputStream.write("@attribute class {running,walking,sitting}".getBytes());
+					outputStream.write("@attribute class {r0,r1,r2,r3,w0,w1,w2,w3,s0,s1,s2,s3}".getBytes());
+					outputStream.write("\n".getBytes());
+				}
+				else{
+					outputStream.write(sCurrentLine.getBytes());
+					outputStream.write("\n".getBytes());
+				}
+			}
+			br.close();
+			//continue reading the rest files
+			for(int i=startFileNum;i<12;i++){
+				if(fileExistArr[i]==true){
+					br = new BufferedReader(new FileReader(fileArr[i]));
+					boolean toWrite = false;
+					while ((sCurrentLine = br.readLine()) != null) {
+						if(toWrite){
+							outputStream.write(sCurrentLine.getBytes());
+							outputStream.write("\n".getBytes());
+						}
+						if(sCurrentLine.equals("@data"))
+							toWrite=true;
+					}
+					br.close();
+				}
+			}
+			outputStream.close();
+			evaluateResult(algo,test,fileName,classifierFileName);
+		}
+		
+	}
+	public void constructFeatures(String mode,boolean test,boolean algo,boolean isCalibration,int position) throws Exception{
+		String pre = getPre(test); //decide the prefix for the output file
+		outputStream = mContext.openFileOutput(pre+mode.substring(0,1)+position+".arff", Context.MODE_PRIVATE);
 		
 		/* Get the just-recorded accelerations from db and construct a feature from every 200 datapoints*/
-		retrieveSensorData(0); //retrieve all data from database
+		retrieveSensorData("",0); //retrieve all data from database
 		for (int i =0;i<accelerations.size()/SAMPLE_SIZE;i++){
 			List<Acceleration> samples = accelerations.subList(i*SAMPLE_SIZE, SAMPLE_SIZE*(i+1)-1);
 			features.add(new Feature(samples));
 		}
-		Instances data = constructInstances(features,mode,isCalibration);
+		Instances data = constructInstances(features,mode,isCalibration,position);
 		outputStream.write(data.toString().getBytes());
 		outputStream.close();
 		
-		evaluateModel( algo, test);
+		constructFinalFile( algo, test);
 		/* We don't need the data for calibration*/
 		mDb.execSQL("DROP TABLE " + DatabaseHelper.ACCELS_TABLE_NAME);
 		mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
 		mDb.close();
 	}
 	public void constructTestFeature(boolean algo) throws Exception{
-		retrieveSensorData(1); //retrieve running data
-		outputStream = mContext.openFileOutput(runningFileName, Context.MODE_PRIVATE);
-		for (int i =0;i<accelerations.size()/SAMPLE_SIZE;i++){
-			List<Acceleration> samples = accelerations.subList(i*SAMPLE_SIZE, SAMPLE_SIZE*(i+1)-1);
-			features.add(new Feature(samples));
+		String[] modes = {"running","walking","sitting"};
+		for(int i=0;i<3;++i){
+			for(int j=0;j<4;++j){ //j is position
+				int isNotEmpty = retrieveSensorData(modes[i],j);//look for all activities in all positions if any data was saved from the database
+				if(isNotEmpty==1){
+					outputStream = mContext.openFileOutput("test_"+modes[i].substring(0,1)+j+".arff", Context.MODE_PRIVATE);
+					for (int k =0;k<accelerations.size()/SAMPLE_SIZE;k++){
+						List<Acceleration> samples = accelerations.subList(k*SAMPLE_SIZE, SAMPLE_SIZE*(k+1)-1);
+						features.add(new Feature(samples));
+					}
+					Instances data = constructInstances(features,modes[i],true,j);
+					outputStream.write(data.toString().getBytes());
+					outputStream.close();
+				}
+			}
 		}
-		Instances data = constructInstances(features,"running",true);
-		outputStream.write(data.toString().getBytes());
-		outputStream.close();
-		
-		retrieveSensorData(2); //retrieve walking data
-		outputStream = mContext.openFileOutput(walkingFileName, Context.MODE_PRIVATE);
-		for (int i =0;i<accelerations.size()/SAMPLE_SIZE;i++){
-			List<Acceleration> samples = accelerations.subList(i*SAMPLE_SIZE, SAMPLE_SIZE*(i+1)-1);
-			features.add(new Feature(samples));
-		}
-		data = constructInstances(features,"walking",true);
-		outputStream.write(data.toString().getBytes());
-		outputStream.close();
-		
-		retrieveSensorData(3); //retrieve sitting data
-		outputStream = mContext.openFileOutput(sittingFileName, Context.MODE_PRIVATE);
-		for (int i =0;i<accelerations.size()/SAMPLE_SIZE;i++){
-			List<Acceleration> samples = accelerations.subList(i*SAMPLE_SIZE, SAMPLE_SIZE*(i+1)-1);
-			features.add(new Feature(samples));
-		}
-		data = constructInstances(features,"sitting",true);
-		outputStream.write(data.toString().getBytes());
-		outputStream.close();
-		
-		evaluateModel(algo, true); //true - J48
+		constructFinalFile(algo, true); //true - J48, test is true
 		/* We don't need the data for calibration*/
 		mDb.execSQL("DROP TABLE " + DatabaseHelper.ACCELS_TABLE_NAME);
 		mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
 		mDb.close();
 	}
-	
 }

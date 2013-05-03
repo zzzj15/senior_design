@@ -64,42 +64,47 @@ public class Feature {
 		DescriptiveStatistics statsX = new DescriptiveStatistics();
 		DescriptiveStatistics statsY = new DescriptiveStatistics();
 		DescriptiveStatistics statsZ = new DescriptiveStatistics();
-//		for (Acceleration e:accelerations){
-//			statsX.addValue(e.getX());
-//			statsY.addValue(e.getY());
-//			statsZ.addValue(e.getZ());
-//		}
-//		
-//		//Transform the accelerations data into vertical and horizontal
-//		/*Step 1
-//			Calculate Average*/
-//		average[0] = statsX.getMean();
-//		average[1] = statsY.getMean();
-//		average[2] = statsZ.getMean();
-//		/*Step 2
-//			unit vector*/
-//		double mag = Math.sqrt(average[0]*average[0]+average[1]*average[1]+average[2]*average[2]);
-//		double[] unitG = {average[0]/mag,average[1]/mag,average[2]/mag};
-//		/*Step 3
-//		 * remove from the frame by subtracting G*/
-//		for (Acceleration e:accelerations){
-//			e.setX(e.getX()-average[0]);
-//			e.setY(e.getY()-average[1]);
-//			e.setZ(e.getZ()-average[2]);
-//		}
-//		/*Step 4
-//		 * calculate the signed length of the component of each vector
-//		 */
-//		
-//		for (Acceleration e:accelerations){
-//			double[] a = {e.getX(),e.getY(),e.getZ()};
-//			double v = -dotProduct(a,unitG);
-//			
-//		}
+		for (Acceleration e:accelerations){
+			statsX.addValue(e.getX());
+			statsY.addValue(e.getY());
+			statsZ.addValue(e.getZ());
+		}
+		
+		//Transform the accelerations data into vertical and horizontal
+		/*Step 1
+			Calculate Average*/
+		average[0] = statsX.getMean();
+		average[1] = statsY.getMean();
+		average[2] = statsZ.getMean();
+		/*Step 2
+			unit vector*/
+		double mag = Math.sqrt(average[0]*average[0]+average[1]*average[1]+average[2]*average[2]);
+		double[] unitG = {average[0]/mag,average[1]/mag,average[2]/mag};
+		/*Step 3
+		 * remove from the frame by subtracting G*/
+		for (Acceleration e:accelerations){
+			e.setX(e.getX()-average[0]);
+			e.setY(e.getY()-average[1]);
+			e.setZ(e.getZ()-average[2]);
+		}
+		/*Step 4
+		 * calculate the signed length of the component of each vector
+		 */
+		DescriptiveStatistics statsV = new DescriptiveStatistics();
+		DescriptiveStatistics statsH = new DescriptiveStatistics();
+		for (Acceleration e:accelerations){
+			double[] a = {e.getX(),e.getY(),e.getZ()};
+			double v = -dotProduct(a,unitG);
+			double h = Math.sqrt(Math.pow(a[0] - v*unitG[0], 2)
+					+Math.pow(a[1] - v*unitG[1], 2)
+					+Math.pow(a[2] - v*unitG[2], 2));
+			statsV.addValue(v);
+			statsH.addValue(h);
+		}
 		
 		//Calculate Standard Deviation
-		std[0] = statsX.getStandardDeviation();
-		std[1] = statsY.getStandardDeviation();
+		std[0] = statsV.getStandardDeviation();
+		std[1] = statsH.getStandardDeviation();
 		std[2] = statsZ.getStandardDeviation();
 		
 		//Calculate Average Absolute Difference, special computation required 
@@ -264,11 +269,11 @@ public class Feature {
 			}
 		}
 		if (maxTab.size()<=1){
-			Log.d(DEBUG_TAG,"size is "+maxTab.size()+"!!!!!!!!!!!!!!!!!!!!");
+//			Log.d(DEBUG_TAG,"size is "+maxTab.size()+"!!!!!!!!!!!!!!!!!!!!");
 			return 0;
 		}
 		else{
-			Log.d(DEBUG_TAG,"size is "+maxTab.size()+"!!!!!!!!!!!!!!!!!!!!");
+//			Log.d(DEBUG_TAG,"size is "+maxTab.size()+"!!!!!!!!!!!!!!!!!!!!");
 			
 			long diffSum=0;
 			int count=0;

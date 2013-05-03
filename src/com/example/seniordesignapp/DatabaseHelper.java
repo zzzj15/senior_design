@@ -58,6 +58,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 	public static final String COL_Y = "yAxis";
 	public static final String COL_Z = "zAxis";
 	public static final String COL_Mode = "Class";
+	public static final String COL_Position = "Position";
 	public static final String COL_TIMESTAMP = "timestamp"; //Time Stamp is in milliseconds
 	
 	public static final String ACCELS_STRING_CREATE = "CREATE TABLE " + ACCELS_TABLE_NAME 
@@ -66,7 +67,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 								+ COL_Y + " REAL, " 
 								+ COL_Z +" REAL, "
 								+ COL_TIMESTAMP + " REAL,"
-								+ COL_Mode + " text);";
+								+ COL_Mode + " text,"
+								+ COL_Position + " integer);";
 	
 	public DatabaseHelper(Context context) {
 		super(context, DB_NAME,null, 1);

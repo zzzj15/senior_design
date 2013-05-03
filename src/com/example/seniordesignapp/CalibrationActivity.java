@@ -53,6 +53,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	private ArrayList<Long> timeStamps;
 	private ArrayList<Float> xSensorData,ySensorData,zSensorData;
 	private boolean mTest,mAlgo;
+	private int mPosition;
 	
 	private void finishTransaction(){
 		 mSensorManager.unregisterListener(this);
@@ -132,6 +133,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		mSensor = (Sensor) mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		mSensorManager.registerListener(this,mSensor,SensorManager.SENSOR_DELAY_FASTEST);
 		mMode = getIntent().getExtras().getString("mode");
+		mPosition = getIntent().getExtras().getInt("position");
 	}
 	@Override
 	protected void onStart(){
@@ -237,7 +239,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 		@Override
 		protected Void doInBackground(String... arg0) {
 			try {
-				new FeaturesConstructor(getApplicationContext()).constructFeatures(arg0[0],mTest,mAlgo,true);
+				new FeaturesConstructor(getApplicationContext()).constructFeatures(arg0[0],mTest,mAlgo,true,mPosition);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
