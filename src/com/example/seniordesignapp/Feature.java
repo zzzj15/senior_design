@@ -98,6 +98,8 @@ public class Feature {
 			double h = Math.sqrt(Math.pow(a[0] - v*unitG[0], 2)
 					+Math.pow(a[1] - v*unitG[1], 2)
 					+Math.pow(a[2] - v*unitG[2], 2));
+			e.setV(v);
+			e.setH(h);
 			statsV.addValue(v);
 			statsH.addValue(h);
 		}
@@ -105,35 +107,29 @@ public class Feature {
 		//Calculate Standard Deviation
 		std[0] = statsV.getStandardDeviation();
 		std[1] = statsH.getStandardDeviation();
-		std[2] = statsZ.getStandardDeviation();
 		
 		//Calculate Average Absolute Difference, special computation required 
 		//for the underlying values, so have to get them from the stats datasets
-		double[] x = statsX.getValues();
-		double[] y = statsY.getValues();
-		double[] z = statsZ.getValues();
+		double[] v = statsV.getValues();
+		double[] h = statsH.getValues();
 		
-		avgAbsDiff[0] = getAvgAbsDiff(x);
-		avgAbsDiff[1] = getAvgAbsDiff(y);
-		avgAbsDiff[2] = getAvgAbsDiff(z);
+		avgAbsDiff[0] = getAvgAbsDiff(v);
+		avgAbsDiff[1] = getAvgAbsDiff(h);
 		//Calculate Average Resultant Acceleration
-		avgRlstAccel = getAvgRlstAccel(x,y,z);
+		avgRlstAccel = getAvgRlstAccel(v,h);
 		
 		//Find Time Peaks
-		timePeaks = getTimePeaks(accelerations,statsX,statsY,statsZ);
+		timePeaks = getTimePeaks(accelerations,statsV,statsH);
 		
 		//Find Binned Distribution
-		Frequency fx = new Frequency();
-		Frequency fy = new Frequency();
-		Frequency fz = new Frequency();
-		for (int i=0;i<x.length;i++){
-			fx.addValue(x[i]);
-			fy.addValue(y[i]);
-			fz.addValue(z[i]);
+		Frequency fv = new Frequency();
+		Frequency fh = new Frequency();
+		for (int i=0;i<v.length;i++){
+			fv.addValue(v[i]);
+			fh.addValue(h[i]);
 		}
-		getBinDist(statsX,fx,0);
-		getBinDist(statsY,fy,10);
-		getBinDist(statsZ,fz,20);
+		getBinDist(statsV,fv,0);
+		getBinDist(statsH,fh,10);
 	}
 	/**
 	 * @param dataset The x,y,z dataset
@@ -152,10 +148,10 @@ public class Feature {
 	 * @param z z accelerations
 	 * @return Avg(sqrt(x[i]^2+y[i]^2+z[i]^2)) over all i from 1 to 200;
 	 */
-	private double getAvgRlstAccel(double[] x,double[] y,double[] z){
+	private double getAvgRlstAccel(double[] x,double[] y){
 		double sum = 0;
 		for (int i =0;i<x.length;i++){
-			sum = Math.sqrt(x[i]*x[i]+y[i]*y[i]+z[i]*z[i]);
+			sum = Math.sqrt(x[i]*x[i]+y[i]*y[i]);
 		}
 		return sum/x.length;
 		
@@ -172,12 +168,12 @@ public class Feature {
 	 *  
 	 * @return
 	 */
-	private double[] getTimePeaks(List<Acceleration> accelerations,DescriptiveStatistics statsX,DescriptiveStatistics statsY,DescriptiveStatistics statsZ){
+	private double[] getTimePeaks(List<Acceleration> accelerations,DescriptiveStatistics statsX,DescriptiveStatistics statsY){
 		double timePeaks[] = new double[3];
 //		timePeaks[0] = peakDet(accelerations,'x',0.05);
 //		timePeaks[1] =peakDet(accelerations,'y',0.05);
 //		timePeaks[2] =peakDet(accelerations,'z',0.05);
-		double xthres=0,ythres=0,zthres=0;
+		double xthres=0,ythres=0;
 		if(statsX.getMax()-statsX.getMin()<0.7)
 			xthres = 1;
 		else
@@ -186,13 +182,9 @@ public class Feature {
 			ythres = 1;
 		else
 			ythres = statsY.getMax()-statsY.getMin();
-		if(statsZ.getMax()-statsZ.getMin()<0.7)
-			zthres = 1;
-		else
-			zthres = statsZ.getMax()-statsZ.getMin();
-		timePeaks[0] = peakDet(accelerations,'x',0.5*xthres);//50% of the full range as threshold
-		timePeaks[1] =peakDet(accelerations,'y',0.5*ythres);
-		timePeaks[2] =peakDet(accelerations,'z',0.5*zthres);
+		
+		timePeaks[0] = peakDet(accelerations,'v',0.5*xthres);//50% of the full range as threshold
+		timePeaks[1] =peakDet(accelerations,'h',0.5*ythres);
 		return timePeaks;
 		
 	}
@@ -232,17 +224,13 @@ public class Feature {
 			Acceleration v = accelerations.get(i);
 			double vx = 0;
 			switch (pos){
-				case 'x':
-					vx = v.getX();
-					mx = maxAccel.getX();
+				case 'v':
+					vx = v.getV();
+					mx = maxAccel.getV();
 					break;
-				case 'y':
-					vx = v.getY();
-					mx = maxAccel.getY();
-					break;
-				case 'z':
-					vx = v.getZ();
-					mx = maxAccel.getZ();
+				case 'h':
+					vx = v.getH();
+					mx = maxAccel.getH();
 					break;
 				default:
 					mx = 0;

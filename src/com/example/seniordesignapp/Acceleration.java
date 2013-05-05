@@ -8,6 +8,8 @@ public class Acceleration{
 	private double x;
 	private double y;
 	private double z;
+	private double v;
+	private double h;
 	private long timestamp;
 	
 	public Acceleration(double x,double y, double z, long timestamp){
@@ -44,5 +46,17 @@ public class Acceleration{
 	public String toString(){
 		return "X: "+x+" Y: "+y+" Z: "+z + ". At time: " + timestamp;
 	}
+	public double getV() {
+		return v;
+	}
+	public void setV(double v) {
+		this.v = v;
+	}
+	public double getH() {
+		return h;
+	}
+	public void setH(double h) {
+		this.h = h;
+	} 
 }
 
