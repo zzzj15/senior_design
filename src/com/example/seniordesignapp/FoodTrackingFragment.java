@@ -80,6 +80,10 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
     public static String filename = "MySharedString";
     String glvalue = "" ;
     
+    // Testing Variables
+    long timeStart;
+    long timeStop;
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -486,6 +490,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 								 /* Check Date & Time */
 				  				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
 				  				String currentDateandTime = sdf.format(new Date());
+				  				timeStop = Long.parseLong(currentDateandTime);
 				  				Log.d(TAG,"Time :"+currentDateandTime);
 			            		updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue,currentDateandTime);
 			            		
@@ -560,7 +565,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		          				 isValid=false;
 		          				 showToastMessage("Recorded "+spinner_pos+" "+fName);
 		          				 Toast.makeText(getActivity(), "DB has recorded:\n" + name + " at\nLongitude = " + tmplon +"\nLatitude = " + tmplat
-		          						 + "\nTime:" + tmptime,Toast.LENGTH_LONG).show();
+		          						 + "\nTime: " + tmptime + "\nTesting Time Taken: " + (timeStop - timeStart ) + " sec",Toast.LENGTH_LONG).show();
 							}
 						});
 
@@ -583,6 +588,11 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
             // the view hierarchy; it would just never be used.
             return null;
         }
+		
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+			String currentDateandTime = sdf.format(new Date());
+			timeStart = Long.parseLong(currentDateandTime);
+			
 			LinearLayout mlinearLayout = (LinearLayout)inflater.inflate(R.layout.fragment_food_tracking, container, false);
 			/*Generate Food Data*/
 	    	generateData();

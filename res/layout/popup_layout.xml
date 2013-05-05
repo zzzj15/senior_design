@@ -12,5 +12,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cancel" />
-
+    
+        <!--  fragment
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.google.android.maps.MapFragment" /-->
+		
+      <!--com.google.android.maps.MapView
+		android:id="@+id/mapview" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:clickable="true"
+		android:apiKey="04dhauAwowq9ziKrEw3nlSM9xHQiKsEdFEhplfA" -->
 </LinearLayout>

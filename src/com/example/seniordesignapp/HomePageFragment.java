@@ -25,10 +25,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.PopupWindow;
+import com.google.android.maps.*;
 
-import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
-import com.handmark.pulltorefresh.library.PullToRefreshExpandableListView;
+
+//import com.handmark.pulltorefresh.library.PullToRefreshBase;
+//import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+//import com.handmark.pulltorefresh.library.PullToRefreshExpandableListView;
 
 public class HomePageFragment extends Fragment {
 
@@ -61,18 +63,6 @@ public class HomePageFragment extends Fragment {
  			mDb = mDbHelper.getWritableDatabase();
  			String sql = "SELECT * FROM foodGPS  ORDER BY GPS_time DESC LIMIT 3";
 			mCursor = mDb.rawQuery(sql,null);
-		
-/*			if (mCursor.getCount() > 0) { // now it is taking the first
- 				// match
- 				// WIP fix later
-				mCursor.moveToFirst();
- 				timeStamp = mCursor.getString(mCursor.getColumnIndex("GPS_time"));
- 				groupItem.add(timeStamp);
- 			} else {
- 				Log.d(TAG,"does not exist in food database! Add it");
- 				//groupItem.add("");
- 			}
-			*/
 			
 			if(mCursor.getCount()>0){ //now it is taking the first match WIP fix later
 				Log.d(TAG,"Adding items to Dynamic Log");
@@ -111,68 +101,20 @@ public class HomePageFragment extends Fragment {
 				showToastMessage("Nothing is in the database...");
 			}
 			
-			
-			
-			
-		/*	groupItem.add("11:35 Ate 1 Hamburger");
-			groupItem.add("4:00 Biked for 20 minutes");
-			groupItem.add("5:21 Climed 2 flights of stairs");*/
-
 			String[] stockArr = new String[groupItem.size()];
 			stockArr = groupItem.toArray(stockArr);
-
 			return stockArr;
 		}
 
-		
-		
-		
 		public String[][] setChildGroupData() { // WIP - hard coding
-		// /**
-		// * Add Data For activity1
-		// */
-		// ArrayList<Object> childItem = new ArrayList<Object>();
-		// ArrayList<String> child = new ArrayList<String>();
-		// child.add("Accelerometer Data");
-		// child.add("9:30 - 10:00");
-		// childItem.add(child);
-		//
-		// /**
-		// * Add Data For activity2
-		// */
-		// child = new ArrayList<String>();
-		// child.add("Manual Input Data");
-		// child.add("11:35");
-		// childItem.add(child);
-		// /**
-		// * Add Data For activity3
-		// */
-		// child = new ArrayList<String>();
-		// child.add("Accelerometer Data");
-		// child.add("3:40 - 4:00");
-		// childItem.add(child);
-		// /**
-		// * Add Data For activity4
-		// */
-		// child = new ArrayList<String>();
-		// child.add("Accelerometer Data");
-		// child.add("5:20 - 5:21");
-		// childItem.add(child);
-		//
-			
+
 			String[][] storeChild = new String[childItem.size()][1];
 			
 			for (int i = 0; i < childItem.size(); i++ ){
 				storeChild[i][0] = childItem.get(i);
 			}
 			
-/*			String[][] childItem = { //{ "Accelerometer Data", "9:30 - 10:00" },
-					{ "Voice Input Data", "11:35" },
-					{ "Accelerometer Data", "3:40 - 4:00" },
-					{ "Accelerometer Data", "5:20 - 5:21" } };
-			*/
 			return storeChild; 
-			//return null;
 		}
 
 		// public boolean onCreateOptionsMenu(Menu menu) {
@@ -196,7 +138,6 @@ public class HomePageFragment extends Fragment {
 			// Layout parameters for the ExpandableListView
 			AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
 					ViewGroup.LayoutParams.MATCH_PARENT, 64);
-
 			TextView textView = new TextView(
 					HomePageFragment.this.getActivity());
 			textView.setLayoutParams(lp);
@@ -350,7 +291,8 @@ public class HomePageFragment extends Fragment {
 		MyExpandableListAdapter expandableAdapter = new MyExpandableListAdapter();
 		lv.setAdapter(expandableAdapter);
 		lv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-		PopupWindow pw;	
+		PopupWindow pw;
+		private MapView mapView;
 			@Override
 			public boolean onChildClick(ExpandableListView parent, View v,
 					int groupPosition, int childPosition, long id) {
@@ -368,6 +310,9 @@ public class HomePageFragment extends Fragment {
 		        // display the popup in the center
 		        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
 		        Button cancelButton = (Button) layout.findViewById(R.id.end_data_send_button);
+		        
+		       // mapView = (MapView) layout.findViewById(R.id.mapview);
+		        //mapView.setBuiltInZoomControls(true);
 		        
 		        cancelButton.setOnClickListener(new OnClickListener() {
 					
