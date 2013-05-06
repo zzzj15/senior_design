@@ -5,31 +5,77 @@
 
     <TextView
         android:id="@+id/TextView01"
-        android:text="CLick Running or Walking to Start Calibration"
+        android:text="Click Button to Start Calibration"
         android:layout_width="wrap_content" android:layout_height="wrap_content" />
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:background="@android:drawable/bottom_bar"
+        android:orientation="vertical"
         android:paddingLeft="4.0dip"
-        android:paddingTop="5.0dip"
+        android:paddingTop="50.0dip"
         android:paddingRight="4.0dip"
         android:paddingBottom="1.0dip"
         android:layout_width="fill_parent" android:layout_height="wrap_content"
         android:layout_below="@+id/TextView01">
-		
-        <ImageButton
+	<RadioGroup
+        android:id="@+id/positionGroup"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dip"
+        android:orientation="vertical" >
+
+     <RadioButton
+         android:id="@+id/right_hand"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:checked="true"
+         android:text="right hand" />
+     <RadioButton
+         android:id="@+id/left_hand"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:checked="false"
+         android:text="left hand" />
+     <RadioButton
+         android:id="@+id/pocket_face_down"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:checked="false"
+         android:text="pocket face down" />
+     <RadioButton
+         android:id="@+id/pocket_face_up"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:checked="false"
+         android:text="pocket face up"/>
+	</RadioGroup>
+        <Button
         android:id="@+id/calibration_running"
-        android:layout_width="0dip"
-        android:layout_height="match_parent"
-        android:src="@drawable/running"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Run"
         android:layout_weight="1.0"/>
-         <ImageButton
+        <Button
         android:id="@+id/calibration_walking"
-        android:layout_width="0dip"
-        android:layout_height="match_parent"
-        android:src="@drawable/walking"
-         android:layout_weight="1.0"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Walk"
+        android:layout_weight="1.0"/>
+         <Button
+        android:id="@+id/calibration_sitting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Sit/Stand"
+        android:layout_weight="1.0"/>
+         <Button
+        android:id="@+id/calibration_testing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Testing"
+        android:layout_weight="1.0"/>
 
 
     </LinearLayout>

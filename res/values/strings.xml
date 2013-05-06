@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">SeniorDesignApp</string>
@@ -19,11 +20,18 @@
     <string name="female">Female</string>
     <string name="height">Height</string>
     <string name="weight">Weight</string>
+    <string name="button_test">Test</string>
+    <string name="button_algo">J48</string>
+    <string name="button_run">Run</string>
+    <string name="button_walk">Walk</string>
+    <string name="button_still">Still</string>
     <string name="toggle_turn_on">Male</string>
     <string name="toggle_turn_off">Female</string>
     <string name="Cancel">Cancel</string>
     <string name="Signup">Signup</string>
     <string name="TargetWeight">TargetWeight</string>
     <string name="title_activity_profile_information">ProfileInformationActivity</string>
-
+    <string name="title_activity_testing">TestingActivity</string>
+    <string name="action_settings">Settings</string>
+    <color name="mycolor1">#FF0000</color>
 </resources>

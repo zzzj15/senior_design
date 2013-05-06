@@ -27,6 +27,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     public final String COL_CALORIES="calories";
     public final String COL_GPSTIME="GPS_time";
     public final String FOODGSP_TABLE_NAME="FoodGPS";
+    public final String COL_GL="GL";
+    public final String COL_QT = "quantity";
+    public final String COL_DISTANCE = "distance"; 
     public final String FOODGPS_STRING_CREATE="create table "+ FOODGSP_TABLE_NAME
     								+ " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " 
     								+ COL_GPSTIME +  " text,"
@@ -34,10 +37,13 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     								+ COL_LONGITUDE +" text,"
     								+ COL_FOODITEM + " text,"
     								+ COL_FOODCATEGORY + " text,"
-    								+ COL_CALORIES + " integer"
+    								+ COL_CALORIES + " integer,"
+    								+ COL_GL		+ " integer,"
+    								+ COL_QT		+ " integer,"
+    								+ COL_DISTANCE + " integer"
     								+");";
     /* Food Parameters */
-    public final String COL_GL="GL";
+    
     public final String COL_GI="GI";
     public final String COL_SERVING_SIZE = "Serve_Size";
     public final String FOOD_TABLE_NAME="food";
@@ -53,6 +59,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 	public static final String COL_X = "xAxis";
 	public static final String COL_Y = "yAxis";
 	public static final String COL_Z = "zAxis";
+	public static final String COL_Mode = "Class";
+	public static final String COL_Position = "Position";
 	public static final String COL_TIMESTAMP = "timestamp"; //Time Stamp is in milliseconds
 	
 	public static final String ACCELS_STRING_CREATE = "CREATE TABLE " + ACCELS_TABLE_NAME 
@@ -60,7 +68,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 								+ COL_X + " REAL, " 
 								+ COL_Y + " REAL, " 
 								+ COL_Z +" REAL, "
-								+ COL_TIMESTAMP + " REAL  );";
+								+ COL_TIMESTAMP + " REAL,"
+								+ COL_Mode + " text,"
+								+ COL_Position + " integer);";
 	
 	public DatabaseHelper(Context context) {
 		super(context, DB_NAME,null, 1);
