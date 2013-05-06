@@ -102,6 +102,7 @@ public class Feature {
 			e.setH(h);
 			statsV.addValue(v);
 			statsH.addValue(h);
+			Log.d(DEBUG_TAG,"v is"+v+" h is "+h);
 		}
 		
 		//Calculate Standard Deviation

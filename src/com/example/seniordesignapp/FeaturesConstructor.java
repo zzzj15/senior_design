@@ -59,14 +59,14 @@ public class FeaturesConstructor{
 		atts = new ArrayList<Attribute>();// set up attributes
 		char[] labels = {'v','h'};
 		for (char e: labels){	     // - numeric
-			atts.add(new Attribute("avg_"+e));
+//			atts.add(new Attribute("avg_"+e));
 			atts.add(new Attribute("std_"+e));
-			atts.add(new Attribute("avgAbsDiff_"+e));
-			atts.add(new Attribute("avgRlstAccel_"+e));
+//			atts.add(new Attribute("avgAbsDiff_"+e));
+//			atts.add(new Attribute("avgRlstAccel_"+e));
 			atts.add(new Attribute("timePeaks_"+e));
-			for (int i=1;i<=BIN_SIZE;i++){
-				atts.add(new Attribute("binDist_"+e+i));
-			}
+//			for (int i=1;i<=BIN_SIZE;i++){
+//				atts.add(new Attribute("binDist_"+e+i));
+//			}
 		}
 		atts.add(new Attribute("avgTimePeaks"));
 		
@@ -77,21 +77,21 @@ public class FeaturesConstructor{
 		
 		for (Feature feature:features){
 			vals = new double[data.numAttributes()];
-			double[] avg = feature.getAverage();
+//			double[] avg = feature.getAverage();
 			double[] std = feature.getStd();
-			double[] avgAbsDiff = feature.getAvgAbsDiff();
-			double avgRlstAccel = feature.getAvgRlstAccel();
+//			double[] avgAbsDiff = feature.getAvgAbsDiff();
+//			double avgRlstAccel = feature.getAvgRlstAccel();
 			double[] timePeaks = feature.getTimePeaks();
-			double[] binDist = feature.getBinDist();
+//			double[] binDist = feature.getBinDist();
 			for (int i=0;i<2;i++){ //There are in total x,y,z 3 datapoints
-				vals[i*15] = avg[i];
-				vals[i*15+1] = std[i];
-				vals[i*15+2] = avgAbsDiff[i];
-				vals[i*15+3] = avgRlstAccel;
-				vals[i*15+4] = timePeaks[i];
+//				vals[i*15] = avg[i];
+//				vals[i*15+1] = std[i];
+//				vals[i*15+2] = avgAbsDiff[i];
+//				vals[i*15+3] = avgRlstAccel;
+//				vals[i*15+4] = timePeaks[i];
 				
-//				vals[i*12] = std[i];
-//				vals[i*12+1] = timePeaks[i];
+				vals[i*2] = std[i];
+				vals[i*2+1] = timePeaks[i];
 //				for (int j=0;j<BIN_SIZE*3;j++){
 //					if(j>=0 && j<=9)
 //						vals[2+j] = binDist[j];
@@ -101,14 +101,14 @@ public class FeaturesConstructor{
 //						vals[6+j] = binDist[j];
 //				}
 				
-				for (int j=0;j<BIN_SIZE*2;j++){
-					if(j>=0 && j<=9)
-						vals[5+j] = binDist[j];
-					else if(j>=10 && j<=19)
-						vals[10+j] = binDist[j];
-				}
+//				for (int j=0;j<BIN_SIZE*2;j++){
+//					if(j>=0 && j<=9)
+//						vals[5+j] = binDist[j];
+//					else if(j>=10 && j<=19)
+//						vals[10+j] = binDist[j];
+//				}
 			}
-//			vals[data.numAttributes()-2]=(timePeaks[0]+timePeaks[1]+timePeaks[2])/3; //hardcoded for now
+			vals[data.numAttributes()-2]=(timePeaks[0]+timePeaks[1])/2; //hardcoded for now
 			if(isCalibration){ //The last attribute is the class running/walking.
 				String m = getName(Position,mode);
 				vals[data.numAttributes()-1] = data.attribute(data.numAttributes()-1).addStringValue(m);
