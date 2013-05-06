@@ -291,7 +291,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		@Override
 		protected Void doInBackground(String... arg0) {
 			try {
-				new FeaturesConstructor(getApplicationContext()).constructTestFeature(false); //j48-true,naivebayes-false,with class name
+				new FeaturesConstructor(getApplicationContext()).constructTestFeature(true); //j48-true,naivebayes-false,with class name
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
