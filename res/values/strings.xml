@@ -33,5 +33,5 @@
     <string name="title_activity_profile_information">ProfileInformationActivity</string>
     <string name="title_activity_testing">TestingActivity</string>
     <string name="action_settings">Settings</string>
-
+    <color name="mycolor1">#FF0000</color>
 </resources>

@@ -1,6 +1,8 @@
 package com.example.seniordesignapp;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.app.SearchManager;
@@ -43,8 +45,10 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 
 public class FoodTrackingFragment extends Fragment implements AdapterView.OnItemSelectedListener,TextWatcher{
+	
 	private static String TAG = "FoodTrackingActivity";
 	private Spinner spin_amount;
+	
 	//private AutoCompleteTextView itemAutoComplete_2,itemAutoComplete_3;
 	private String[] foodItem;
 	private ImageButton mbtSpeak,mbtSearch;
@@ -53,8 +57,11 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	private ListView mlv;
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1001;
 
-	//GPS parameters
+	/* After confirm button stuff */
+	// GPSTracker class
+	GPSTracker gps;
 	
+	//GPS parameters	
 	private LocationManager locationManager;
 	private LocationListener locationListener;
     private Double lon,lat;
@@ -73,6 +80,10 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
     public static String filename = "MySharedString";
     String glvalue = "" ;
     
+    // Testing Variables
+    long timeStart;
+    long timeStop;
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -88,15 +99,17 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
 			long arg3) {
 		// TODO Auto-generated method stub
-//		switch(arg0.getId()){
-//		case R.id.spinner1:
-//		default:
-//		}
+		//switch(arg0.getId()){
+		//case R.id.spinner1:
+		//default:
+		//}
 	}
 
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
+		// TODO Auto-generated method stub
 	}
+	
 	private void generateData(){
 		/*Initialize food database*/
     	mDbHelper = new DatabaseHelper(getActivity());
@@ -109,7 +122,6 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 				R.id.foodlist
 		};
 		isValid = false;
-		
 	}
 	String[] getFoodItemList(){
 		Cursor crs = mDb.rawQuery("SELECT food_name FROM food", null);
@@ -123,6 +135,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		}
 		return array;
 	}
+	
 	private void initializeAmountSpinners(){
 		ArrayAdapter<String> aa = null;
 		aa = new ArrayAdapter<String>(getActivity(),
@@ -320,7 +333,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 
 	void requestGPSupdate(){
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-		//		class MyLocThread extends Thread 
+//		class MyLocThread extends Thread 
 //		{ 
 //		public MyLocThread () 
 //		{ 
@@ -345,7 +358,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 //	}
 //		getActivity().runOnUiThread(new MyLocThread());
 	}
-	public  void updateFoodGPSDatabase(String fName,Double lon,Double lat,int q,int gl){
+	public  void updateFoodGPSDatabase(String fName,Double lon,Double lat,int q,int gl, String time){
 		
 		ContentValues value=new ContentValues();
 		
@@ -359,31 +372,100 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		value.put("GL", gl);
 		value.put("latitude", lat.toString());
 		value.put("longitude", lon.toString());
-		Log.d(TAG, "INSERTING into FoodGPS latitude "+lat+"longitude"+lon + "food name "+ fName + "quantity " + q + "GL "+gl);
+		value.put("GPS_time", time);
+		Log.d(TAG, "INSERTING into FoodGPS latitude "+lat+"longitude"+lon + "food name "+ fName + "quantity " + q + "GL "+gl + "at " +time);
 		mDb.insert("FoodGPS",null,value);
         
     }
-	private ArrayList<String> refreshFrequentChoice(){
-		 ArrayList<String> sData = new ArrayList<String>();
-		String sql = "SELECT GL,food_name, COUNT(food_name)"
-				+ " FROM FoodGPS WHERE food_name NOT NULL"
-				+" GROUP BY food_name"
-				+" ORDER BY COUNT(food_name) DESC"
-				+" LIMIT 5";
-		mCursor = mDb.rawQuery(sql, null);
-		
-		if(mCursor.getCount()>0){ //now it is taking the first match WIP fix later
-			mCursor.moveToFirst();
-			sData.add(mCursor .getString(mCursor .getColumnIndex("food_name")));
-				while (!mCursor .isLast()) {
-					mCursor .moveToNext();
-				    String Name = mCursor .getString(mCursor .getColumnIndex("food_name"));
-				    sData.add(Name);
-				}
+
+	private ArrayList<String> refreshFrequentChoice() {
+
+		/* See Where is selected (GPS) */
+		/* Create GPS class object */
+		gps = new GPSTracker(getActivity());
+		/* Check if GPS enabled */
+		if (gps.canGetLocation()) {
+			lat = gps.getLatitude();
+			lon = gps.getLongitude();
+			// \n is for new line
+			Toast.makeText(getActivity(),
+					"Your Location is - \nLat: " + lat + "\nLong: " + lon,
+					Toast.LENGTH_LONG).show();
+		} else {
+			// can't get location
+			// GPS or Network is not enabled
+			// Ask user to enable GPS/network in settings
+			gps.showSettingsAlert();
 		}
-		isValid=true;
+		float tmplong = 0;
+		float tmplat = 0;
+		float tmpdis= 0;
+		ContentValues value=new ContentValues();
+		String sql = "SELECT food_name,latitude, longitude, distance "
+				+ " FROM FoodGPS WHERE food_name NOT NULL";
+		mCursor = mDb.rawQuery(sql, null);
+		if (mCursor.getCount() > 0) { // now it is taking the first match WIP
+			// fix later
+		mCursor.moveToFirst();
+		tmplat = mCursor.getFloat(mCursor.getColumnIndex("latitude"));
+		tmplong = mCursor.getFloat(mCursor.getColumnIndex("longitude"));
+		tmpdis = distFrom(tmplat,tmplong, lat.floatValue(), lon.floatValue());
+		Log.d(TAG, "Adding distance " +tmpdis+ " to FoodGPS");		
+		value.put("distance", tmpdis);
+		mDb.update("FoodGPS", value, null, null);
+		while (!mCursor.isLast()) {
+			mCursor.moveToNext();
+			tmplat = mCursor.getFloat(mCursor.getColumnIndex("latitude"));
+			tmplong = mCursor.getFloat(mCursor.getColumnIndex("longitude"));
+			tmpdis = distFrom(tmplat,tmplong, lat.floatValue(), lon.floatValue());
+			Log.d(TAG, "Adding distance " +tmpdis+ " to FoodGPS");		
+			value.put("distance", tmpdis);
+			mDb.update("FoodGPS", value, null, null);
+			}
+		showToastMessage("Got " + tmplat + "\n& " + tmplong +"\ndistance is" + tmpdis);
+		}
+		
+		// Display on the list
+		ArrayList<String> sData = new ArrayList<String>();
+		 sql = "SELECT food_name, COUNT(food_name), distance, GL"
+				+ " FROM FoodGPS WHERE food_name NOT NULL"
+				+ " GROUP BY food_name" + " ORDER BY COUNT(food_name) DESC"
+				+ " LIMIT 5";
+		 
+		 sql = "SELECT food_name, distance, GL FROM (" + sql + ") ORDER BY distance DESC";
+		mCursor = mDb.rawQuery(sql, null);
+
+		if (mCursor.getCount() > 0) { // now it is taking the first match WIP
+										// fix later
+			mCursor.moveToFirst();
+			sData.add(mCursor.getString(mCursor.getColumnIndex("food_name")));
+			while (!mCursor.isLast()) {
+				mCursor.moveToNext();
+				String Name = mCursor.getString(mCursor
+						.getColumnIndex("food_name"));
+				sData.add(Name);
+			}
+		}
+		isValid = true;
 		return sData;
 	}
+
+	public static float distFrom(float lat1, float lng1, float lat2, float lng2) {
+		double earthRadius = 3958.75;
+		double dLat = Math.toRadians(lat2 - lat1);
+		double dLng = Math.toRadians(lng2 - lng1);
+		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+				+ Math.cos(Math.toRadians(lat1))
+				* Math.cos(Math.toRadians(lat2)) * Math.sin(dLng / 2)
+				* Math.sin(dLng / 2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		double dist = earthRadius * c;
+
+		int meterConversion = 1609;
+
+		return new Float(dist * meterConversion).floatValue();
+	}
+	
 	private void uponConfirm(String x,final int spinner_pos, final int pos, final int glvalue,final String fName){
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setMessage(x)
@@ -404,7 +486,77 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 							@Override
 							public void onClick(DialogInterface dialog,
 									int id) {
-			            		 updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue);
+								
+								 /* Check Date & Time */
+				  				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+				  				String currentDateandTime = sdf.format(new Date());
+				  				timeStop = Long.parseLong(currentDateandTime);
+				  				Log.d(TAG,"Time :"+currentDateandTime);
+			            		updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue,currentDateandTime);
+			            		
+			 	  				
+			            		 /* Testing Starts */
+			 	              	mDbHelper = new DatabaseHelper(getActivity());
+			 	    			mDb = mDbHelper.getWritableDatabase();
+			 	              	String sql = "SELECT food_name FROM foodGPS WHERE lower(food_name) LIKE lower('%"
+			 	    					+ mlv.getItemAtPosition(pos).toString() + "%');";
+			 	    			//String sql = "SELECT " + latitude + " FROM FoodGPS";
+			 	    			Cursor crs = mDb.rawQuery(sql, null);
+			 	    			//crs.moveToFirst();
+			 	    			String name = ""; 
+			 	    			if (crs.getCount() > 0) { // now it is taking the first
+			 	    				// match
+			 	    				// WIP fix later
+			 	    				crs.moveToFirst();
+			 	    				name = crs.getString(crs.getColumnIndex("food_name"));
+			 	    			} else {
+			 	    				name = name + " does not exist in food database! Add it";
+			 	    			}
+			 	    			mDbHelper = new DatabaseHelper(getActivity());
+			 	    			mDb = mDbHelper.getWritableDatabase();
+			 	    			sql = "SELECT latitude FROM foodGPS WHERE lower(food_name) LIKE lower('%"
+			 	    					+ mlv.getItemAtPosition(pos).toString() + "%');";
+			 	    			crs = mDb.rawQuery(sql, null);
+			 	    			String tmplat = "";
+			 	    			if (crs.getCount() > 0) { // now it is taking the first
+			 	    				// match
+			 	    				// WIP fix later
+			 	    				crs.moveToFirst();
+			 	    				tmplat = crs.getString(crs.getColumnIndex("latitude"));
+			 	    			} else {
+			 	    				tmplat = tmplat + " does not exist in food database! Add it";
+			 	    			}
+			 	    			mDbHelper = new DatabaseHelper(getActivity());
+			 	    			mDb = mDbHelper.getWritableDatabase();
+			 	    			sql = "SELECT longitude FROM foodGPS WHERE lower(food_name) LIKE lower('%"
+			 	    					+ mlv.getItemAtPosition(pos).toString() + "%');";
+			 	    			crs = mDb.rawQuery(sql, null);
+			 	    			String tmplon = "";
+			 	    			if (crs.getCount() > 0) { // now it is taking the first
+			 	    				// match
+			 	    				// WIP fix later
+			 	    				crs.moveToFirst();
+			 	    				tmplon = crs.getString(crs.getColumnIndex("longitude"));
+			 	    			} else {
+			 	    				tmplon = tmplon + " does not exist in food database! Add it";
+			 	    			}
+		 	   			mDbHelper = new DatabaseHelper(getActivity());
+			 	    			mDb = mDbHelper.getWritableDatabase();
+			 	    			sql = "SELECT GPS_time FROM foodGPS WHERE lower(food_name) LIKE lower('%"
+			 	    					+ mlv.getItemAtPosition(pos).toString() + "%');";
+			 	    			crs = mDb.rawQuery(sql, null);
+			 	    			String tmptime = "";
+			 	    			if (crs.getCount() > 0) { // now it is taking the first
+			 	    				// match
+			 	    				// WIP fix later
+			 	    				crs.moveToFirst();
+			 	    				tmptime = crs.getString(crs.getColumnIndex("GPS_time"));
+			 	    			} else {
+			 	    				tmptime = tmptime + " does not exist in food database! Add it";
+			 	    			}
+			 	    			/* Testing Ends*/
+			 	    			
+			 	    			
 		          				 ArrayList<String> in = new ArrayList<String>();
 		          				 in.add("No Results");
 		          				 mlv.setAdapter(new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_single_choice, in));
@@ -412,6 +564,8 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		          				 mEdtText.setText("");
 		          				 isValid=false;
 		          				 showToastMessage("Recorded "+spinner_pos+" "+fName);
+		          				 Toast.makeText(getActivity(), "DB has recorded:\n" + name + " at\nLongitude = " + tmplon +"\nLatitude = " + tmplat
+		          						 + "\nTime: " + tmptime + "\nTesting Time Taken: " + (timeStop - timeStart ) + " sec",Toast.LENGTH_LONG).show();
 							}
 						});
 
@@ -434,6 +588,11 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
             // the view hierarchy; it would just never be used.
             return null;
         }
+		
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+			String currentDateandTime = sdf.format(new Date());
+			timeStart = Long.parseLong(currentDateandTime);
+			
 			LinearLayout mlinearLayout = (LinearLayout)inflater.inflate(R.layout.fragment_food_tracking, container, false);
 			/*Generate Food Data*/
 	    	generateData();
@@ -457,10 +616,10 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
  	        mbtSearch = (ImageButton) mlinearLayout.findViewById(R.id.search_btn);
 	        mbtSearch.setOnClickListener(new View.OnClickListener() {
 		        	public void onClick(View v) {
-		            if (v.getId() == R.id.search_btn) {
-		                //listen for results
-		            	searchAll();
-		            }
+			            if (v.getId() == R.id.search_btn) {
+			                //listen for results
+			            	searchAll();
+			            }
 		        	}
 					public boolean onKey(View v, int keyCode, KeyEvent event) {
 						// TODO Auto-generated method stub
@@ -532,18 +691,23 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	    	                  showToastMessage("longitude "+lon+"latitude "+lat+"time "+gpstime);
 	    				}
 	            	  };
+	            	  
+	            	 
+	  				
+
+	  				
 	            	  /* request location and store to database*/
 	            	 // Register the listener with the Location Manager to receive location updates
 	            	  //requestGPSupdate();
 	            	  //updateFoodGPSDatabase(lon,lat);
 	            	  
 	            	  //for testing
-	            	  lon = 5.2;
-	            	  lat = 5.2;
-	            	  /* Get the position of user's selection*/
+	            	  //lon = 5.2;
+	            	  //lat = 5.2;
+	            	  //Get the position of user's selection
 	            	  int pos = mlv.getCheckedItemPosition();
-	            	  int spinner_pos =  spin_amount.getSelectedItemPosition();
-	            	  
+	            	 int spinner_pos =  spin_amount.getSelectedItemPosition();
+	            	 
 //	            	ArrayList<Integer> foodIDs = new ArrayList<Integer>();
 	            	ArrayList<Integer> GLs = new ArrayList<Integer>();
 	            	if(isValid){
@@ -575,6 +739,8 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	            	} 
 	            	else //if not valid
 	            		showToastMessage("Enter Food Item First");
+	            	
+	            	
 	            } 
 	          //remove listener
             	//locationManager.removeUpdates (locationListener);

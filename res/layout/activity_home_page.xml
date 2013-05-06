@@ -2,7 +2,9 @@
     xmlns:atswidget="http://schemas.android.com/apk/res/com.example.seniordesignapp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:background="@drawable/app_bg"
+    android:orientation="vertical"
+    android:tileMode="repeat" >
 
     <RelativeLayout
         android:id="@+id/top_view"
@@ -42,14 +44,15 @@
         android:src="@drawable/performance"
         android:adjustViewBounds="true"/
     -->
-<!-- 	 <RelativeLayout -->
-<!--         android:id="@+id/gauge_view" -->
-<!--         android:layout_width="wrap_content" -->
-<!--         android:layout_height="wrap_content" -->
-<!--         android:paddingLeft="20dp" -->
-<!--         android:paddingRight="20dp" -->
-<!--         android:gravity="center" > -->
-    <com.example.seniordesignapp.Gauge
+      
+	 <!-- <RelativeLayout
+        android:id="@+id/gauge_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:gravity="center" > -->
+    <!-- com.example.seniordesignapp.Gauge
         android:id="@+id/meter"
         android:layout_width="wrap_content"
         android:layout_height="180dp"
@@ -76,42 +79,133 @@
         atswidget:showRange="true"
         atswidget:totalNotches="120"
         atswidget:unitTitle=""
-        atswidget:upperTitle="" />
-<!-- 	 </RelativeLayout> -->
-    
-    <!-- LinearLayout
-        xmlns:atswidget="http://schemas.android.com/apk/res/com.atsglobal.android.widgets"
+        atswidget:upperTitle="" /-->
+	 <!--/RelativeLayout -->
+	 
+	 <RelativeLayout
+        android:id="@+id/top_view"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="horizontal"
-        android:padding="0px" >
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
 
-        <Button
-            android:id="@+id/add"
-            android:layout_width="0px"
+        <ImageView
+            android:id="@+id/restaurant"
+            android:layout_width="64px"
+            android:layout_height="64px"
+            android:src="@drawable/restaurant" />
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:padding="0px"
-            android:text="Add" />
-    </LinearLayout-->
+            android:layout_toRightOf="@+id/restaurant" 
+            android:paddingLeft="3dp"           
+            android:text="Total Daily GL"
+            android:textColor="#385798"
+            android:textStyle="bold"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/restaurant"             
+            android:layout_below="@+id/textView1"
+            android:paddingLeft="3dp" 
+            android:text="0"
+            android:textColor="#385798" 
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </RelativeLayout>
+    
+	 
+	<ImageView
+        android:id="@+id/sectionDivider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/divider2"/>
+	
+	
+	<RelativeLayout
+        android:id="@+id/top_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:layout_alignParentBottom="true" >
+
+        <ImageView
+            android:id="@+id/runningSM"
+            android:layout_width="64px"
+            android:layout_height="64px"
+            android:src="@drawable/running_sm" />
+
+        <TextView
+            android:id="@+id/Exercise"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/runningSM"
+            android:paddingLeft="3dp"  
+            android:text="Total Minute Walking"
+            android:textColor="#ec624e"
+            android:textStyle="bold"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/minWalk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/runningSM"             
+            android:layout_below="@+id/Exercise"
+            android:paddingLeft="3dp" 
+            android:text="0 min"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </RelativeLayout>
+	
     <View
         android:id="@+id/Divider"
         android:layout_width="fill_parent"
         android:layout_height="2dp"
+        android:paddingTop="5dp"
         android:background="#d3d3d3" />
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Dynamic Log"
+        android:textStyle="bold"
         android:textSize="16dip" />
 
     <ExpandableListView
         android:id="@+id/log_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawSelectorOnTop="false" >
-    </ExpandableListView>
+        android:drawSelectorOnTop="false"/>
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="10px" >
+
+        <Button
+            android:id="@+id/testing"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:padding="0px"
+            android:text="Refresh" />
+    </LinearLayout>
+    
+    
+  
+    <!-- The PullToRefreshExpandableListView replaces a standard ExpandableListView widget. -->
+
+    <!--com.example.seniordesignappcom.example.seniordesignapppulltorefresh.library.PullToRefreshExpandableListView
+        xmlns:ptr="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/log_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        ptr:ptrHeaderBackground="@android:color/darker_gray"
+        ptr:ptrHeaderTextColor="@android:color/white"
+        ptr:ptrMode="pullUpFromBottom" -->
+    
 
 </LinearLayout>
