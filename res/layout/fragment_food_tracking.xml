@@ -32,7 +32,42 @@
     android:orientation="vertical" 
     android:focusable="true"
     android:descendantFocusability="afterDescendants">
+    
+    <!-- Testing Stuff -->
 
+            <TextView
+                android:id="@+id/testingarea"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="3dp"
+                android:textColor="#ec624e"
+                android:text="Testing Area"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <Button
+                android:id="@+id/start_timer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="0px"
+                android:text="Start Timer" />
+
+            <ImageView
+                android:id="@+id/divider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/divider2" />
+             <TextView
+                android:id="@+id/testingarea"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="3dp"
+                android:textColor="#385798"
+                android:text="Application Area"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <!-- Testing Ends -->
+
+    
     <!-- Outer layout defines the entire search bar at the top of the screen -->
     <!-- Bottom padding of 16 is due to the graphic, with 9 extra pixels of drop
          shadow, plus the desired padding of "8" against the user-visible (grey)
@@ -43,7 +78,7 @@
         android:orientation="vertical"
         android:paddingLeft="8dip"
         android:paddingRight="8dip"
-        android:paddingBottom="16dip"
+        android:paddingBottom="-16dip"
         android:baselineAligned="false"
         android:addStatesFromChildren="true" >
 
@@ -74,6 +109,7 @@
             android:gravity="center_vertical"
             android:baselineAligned="false" >
 
+            
             <EditText
                 android:id="@+id/search_src_text"
                 android:layout_height="wrap_content"
