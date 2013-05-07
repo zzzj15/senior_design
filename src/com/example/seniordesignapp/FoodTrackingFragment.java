@@ -29,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -87,6 +88,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
     final String GPS_INPUT = "GPS"; 
     final String MANUAL_INPUT = "Manual"; 
     String inputMethod = "";
+    private Button timerStart;
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -504,9 +506,10 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 								 /* Check Date & Time */
 				  				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
 				  				String currentDateandTime = sdf.format(new Date());
-				  				timeStop = Long.parseLong(currentDateandTime);
+				  				//timeStop = Long.parseLong(currentDateandTime);
+				  				timeStop = System.currentTimeMillis();
 				  				Log.d(TAG,"Time :"+currentDateandTime);
-			            		updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue,currentDateandTime, inputMethod, (int) (timeStop - timeStart ));
+			            		updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue,currentDateandTime, inputMethod, (int) ((timeStop - timeStart)/1000));
 			            		
 			 	  				
 			            		 /* Testing Starts */
@@ -580,7 +583,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		          				 showToastMessage("Recorded "+spinner_pos+" "+fName);
 		          				 Toast.makeText(getActivity(), "DB has recorded:\n" + name + " at\nLongitude = " + tmplon +"\nLatitude = " + tmplat
 		          						 + "\nTime: " + tmptime + "\nTesting Input Type: " + inputMethod
-		          						 + "\nTesting Time Taken: " + (timeStop - timeStart ) + " sec",Toast.LENGTH_LONG).show();
+		          						 + "\nTesting Time Taken: " + ((timeStop - timeStart)/1000 ) + " sec",Toast.LENGTH_LONG).show();
 							}
 							
 						});
@@ -605,11 +608,34 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
             return null;
         }
 		
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-			String currentDateandTime = sdf.format(new Date());
-			timeStart = Long.parseLong(currentDateandTime);
+		
+			
 			
 			LinearLayout mlinearLayout = (LinearLayout)inflater.inflate(R.layout.fragment_food_tracking, container, false);
+			
+			/* Testing Start */
+			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+			String currentDateandTime = sdf.format(new Date());
+			//timeStart = Long.parseLong(currentDateandTime);
+			timeStart = System.currentTimeMillis();
+			
+			timerStart = (Button) mlinearLayout.findViewById(R.id.start_timer);
+			timerStart.setOnClickListener( new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+					String currentDateandTime = sdf.format(new Date());
+					//timeStart = Long.parseLong(currentDateandTime);
+					timeStart = System.currentTimeMillis();
+					showToastMessage("Start!!!");
+					
+				}
+			});
+			/* Testing Ends */
+			
 			/*Generate Food Data*/
 	    	generateData();
 	    	/*Initialize Location manager*/
@@ -759,7 +785,6 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	            	} 
 	            	else //if not valid
 	            		showToastMessage("Enter Food Item First");
-	            	
 	            	
 	            } 
 	          //remove listener
