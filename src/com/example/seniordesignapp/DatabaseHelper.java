@@ -30,6 +30,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     public final String COL_GL="GL";
     public final String COL_QT = "quantity";
     public final String COL_DISTANCE = "distance"; 
+    public final String COL_INPUT = "input"; 
+    public final String COL_STOPTIMER = "stoptimer"; 
     public final String FOODGPS_STRING_CREATE="create table "+ FOODGSP_TABLE_NAME
     								+ " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " 
     								+ COL_GPSTIME +  " text,"
@@ -40,7 +42,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     								+ COL_CALORIES + " integer,"
     								+ COL_GL		+ " integer,"
     								+ COL_QT		+ " integer,"
-    								+ COL_DISTANCE + " integer"
+    								+ COL_DISTANCE + " integer,"
+    								+ COL_INPUT + " text,"
+    								+ COL_STOPTIMER + " integer"
     								+");";
     /* Food Parameters */
     

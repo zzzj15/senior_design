@@ -75,14 +75,18 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
     private static final int DIALOG_CONFIRM = 10;
     
     // Sharing GL data
-    
     SharedPreferences GLdata;
     public static String filename = "MySharedString";
     String glvalue = "" ;
     
     // Testing Variables
+    private static String FOOD_TEST = "Testing_FoodTrackingActivity";
     long timeStart;
     long timeStop;
+    final String VOICE_INPUT = "Voice"; 
+    final String GPS_INPUT = "GPS"; 
+    final String MANUAL_INPUT = "Manual"; 
+    String inputMethod = "";
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -358,8 +362,11 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 //	}
 //		getActivity().runOnUiThread(new MyLocThread());
 	}
-	public  void updateFoodGPSDatabase(String fName,Double lon,Double lat,int q,int gl, String time){
-		
+
+	
+	//public  void updateFoodGPSDatabase(String fName,Double lon,Double lat,int q,int gl, String time){
+	//Testing
+	public  void updateFoodGPSDatabase(String fName,Double lon,Double lat,int q,int gl, String time, String testInput, int stopTimer){
 		ContentValues value=new ContentValues();
 		
 //		String sql = "SELECT GL FROM food WHERE lower(food_name) LIKE lower('%"+fName+"%');";
@@ -373,6 +380,10 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		value.put("latitude", lat.toString());
 		value.put("longitude", lon.toString());
 		value.put("GPS_time", time);
+		//testing
+		value.put("input", testInput);
+		value.put("stoptimer", stopTimer);
+		Log.d(FOOD_TEST,"Inserting testing parameters");
 		Log.d(TAG, "INSERTING into FoodGPS latitude "+lat+"longitude"+lon + "food name "+ fName + "quantity " + q + "GL "+gl + "at " +time);
 		mDb.insert("FoodGPS",null,value);
         
@@ -437,6 +448,9 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 
 		if (mCursor.getCount() > 0) { // now it is taking the first match WIP
 										// fix later
+			//testing
+			inputMethod = GPS_INPUT;
+					
 			mCursor.moveToFirst();
 			sData.add(mCursor.getString(mCursor.getColumnIndex("food_name")));
 			while (!mCursor.isLast()) {
@@ -492,7 +506,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 				  				String currentDateandTime = sdf.format(new Date());
 				  				timeStop = Long.parseLong(currentDateandTime);
 				  				Log.d(TAG,"Time :"+currentDateandTime);
-			            		updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue,currentDateandTime);
+			            		updateFoodGPSDatabase(mlv.getItemAtPosition(pos).toString(),lon,lat,spinner_pos,glvalue,currentDateandTime, inputMethod, (int) (timeStop - timeStart ));
 			            		
 			 	  				
 			            		 /* Testing Starts */
@@ -565,8 +579,10 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		          				 isValid=false;
 		          				 showToastMessage("Recorded "+spinner_pos+" "+fName);
 		          				 Toast.makeText(getActivity(), "DB has recorded:\n" + name + " at\nLongitude = " + tmplon +"\nLatitude = " + tmplat
-		          						 + "\nTime: " + tmptime + "\nTesting Time Taken: " + (timeStop - timeStart ) + " sec",Toast.LENGTH_LONG).show();
+		          						 + "\nTime: " + tmptime + "\nTesting Input Type: " + inputMethod
+		          						 + "\nTesting Time Taken: " + (timeStop - timeStart ) + " sec",Toast.LENGTH_LONG).show();
 							}
+							
 						});
 
 		AlertDialog alert = builder.create();
@@ -617,9 +633,11 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	        mbtSearch.setOnClickListener(new View.OnClickListener() {
 		        	public void onClick(View v) {
 			            if (v.getId() == R.id.search_btn) {
+			            	//testing
+			            	inputMethod = MANUAL_INPUT;
 			                //listen for results
 			            	searchAll();
-			            }
+			            } 
 		        	}
 					public boolean onKey(View v, int keyCode, KeyEvent event) {
 						// TODO Auto-generated method stub
@@ -631,6 +649,8 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		        mbtSpeak.setOnClickListener(new View.OnClickListener() {
 		        	public void onClick(View v) {
 		            if (v.getId() == R.id.voice_btn) {
+		            	//testing
+		            	inputMethod = VOICE_INPUT;
 		                //listen for results
 		                speak(v);
 		            }
