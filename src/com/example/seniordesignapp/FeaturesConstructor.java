@@ -206,7 +206,7 @@ public class FeaturesConstructor{
 		return pre;
 	}
 	private String getCurrentTime(){
-		SimpleDateFormat dateFormat = new SimpleDateFormat("MMdd_HHmm");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MMdd_HHmmss");
 		String currentDateandTime = dateFormat.format(new Date());
 		return currentDateandTime;
 	}
