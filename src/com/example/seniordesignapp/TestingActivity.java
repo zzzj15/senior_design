@@ -58,6 +58,8 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	private boolean mTest,mAlgo;
 	private int mCount,mPosition;
 	private AsyncTask<Integer, Integer, Integer> mUpdateTimer;
+	private int mCnt;
+	private boolean mCheckState,mTimerValid;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -108,21 +110,30 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		mMode = "sitting";
 		mCount = 0;
 		mIsCountdown = false;
+		mTimerValid = false;
 		mUpdateTimer = new UpdateTimerLabel();
+		mCheckState = false;
+		mCnt = 0;
+		timeStamps = new ArrayList<Long>();
+		xSensorData = new ArrayList<Float>();
+		ySensorData = new ArrayList<Float>();
+		zSensorData = new ArrayList<Float>();
+		mClasses = new ArrayList<String>();
+		mPositions = new ArrayList<Integer>();
 		
 		mStartButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				
-				if(mIsCountdown == false){
+				if(mTimerValid ==false){
+//				if(mIsCountdown == false){
 					timeStamps = new ArrayList<Long>();
 					xSensorData = new ArrayList<Float>();
 					ySensorData = new ArrayList<Float>();
 					zSensorData = new ArrayList<Float>();
 					mClasses = new ArrayList<String>();
 					mPositions = new ArrayList<Integer>();
-					
-					mIsCountdown = true;
+					switchState();//mIsCountdown = true;
+					mTimerValid = true;
 					mUpdateTimer = new UpdateTimerLabel();
 					mUpdateTimer.execute();
 					mStartButton.setText("Stop");
@@ -130,7 +141,9 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 					
 				}
 				else{
+					removeRecords();
 					finishTransaction();
+					mTimerValid = false;
 					mIsCountdown = false;
 					mStartButton.setText("Start");
 				}
@@ -142,28 +155,37 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		mRadioPositionGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(RadioGroup group, int checkedId) {
-            	if(checkedId == R.id.right_hand){
+            	if(checkedId == R.id.hand){
         			mPosition = 0;
+        			switchState();
+        			removeRecords();
 //        			Log.d(DEBUG_TAG,"position "+mPosition);
                 }
-               if(checkedId == R.id.left_hand){
+               if(checkedId == R.id.pocket){
             	   mPosition = 1;
+            	   removeRecords();
+            	   switchState();
 //            		Log.d(DEBUG_TAG,"position "+mPosition);
                }
-               if(checkedId == R.id.pocket_face_down){
+               if(checkedId == R.id.hand_text){
             	   mPosition = 2;
+            	   switchState();
+            	   removeRecords();
 //            	   	Log.d(DEBUG_TAG,"position "+mPosition);
                }
-               if(checkedId == R.id.pocket_face_up){
-            	   mPosition = 3;
-//            	   	Log.d(DEBUG_TAG,"position "+mPosition);
-               }
+//               if(checkedId == R.id.pocket_face_up){
+//            	   mPosition = 3;
+//            	   switchState();
+//            	   removeRecords();
+////            	   	Log.d(DEBUG_TAG,"position "+mPosition);
+//               }
 			}
           });
 	}
 	@Override
     protected void onStop() {
         super.onStop();
+        mTimerValid = false;
         mIsCountdown = false;
         mUpdateTimer.cancel(true);
         // unregister with the orientation sensor before exiting:
@@ -176,17 +198,46 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	public void onCheckedChanged(RadioGroup group, int checkedId) {
 		if(checkedId == R.id.Run){
 			mMode = "running";
+			switchState();
+			removeRecords();
 //			Log.d(DEBUG_TAG,mMode);
         }
        if(checkedId == R.id.Walk){
     	   mMode = "walking";
+    	   switchState();
+    	   removeRecords();
 //    	   Log.d(DEBUG_TAG,mMode);
        }
        if(checkedId == R.id.Still){
     	   mMode = "sitting";
+    	   switchState();
+    	   removeRecords();
 //    	   Log.d(DEBUG_TAG,mMode);
        }
      
+	}
+	private void switchState(){
+		mCnt = 0;
+		mCheckState=true;
+	}
+	private void checkSwitchState(){
+		if(mCnt>5){
+			mIsCountdown=true;
+			mCheckState=false;
+		}
+		mCnt++;
+	}
+	private void removeRecords(){//remove 250 sensor data before sensor state change
+		for(int i=0;i<250;i++){ //250 sensor data is approximately 5 seconds
+	        if(timeStamps.size()>0){
+	        	timeStamps.remove(timeStamps.size()-1);
+	        	xSensorData.remove(xSensorData.size()-1);//remove last element
+	        	ySensorData.remove(ySensorData.size()-1);
+	        	zSensorData.remove(zSensorData.size()-1);
+	        	mClasses.remove(mClasses.size()-1);
+	        	mPositions.remove(mPositions.size()-1);
+	        }
+		}
 	}
 	@Override
 	public void onClick(View v) {
@@ -208,7 +259,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	@Override
 	public void onSensorChanged(SensorEvent sensorEvent) {
 		// TODO Auto-generated method stub
-		if(mIsCountdown){
+		if(mTimerValid){
 			// get rid the oldest sample in history:
 	        if (mXSeries.size() > HISTORY_SIZE) {
 	        	mXSeries.removeFirst();
@@ -221,12 +272,14 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	        mYSeries.addLast(null, sensorEvent.values[1]);
 	        mZSeries.addLast(null, sensorEvent.values[2]);
 	        long curTime = System.nanoTime();
-	        timeStamps.add(curTime);
-	        xSensorData.add(sensorEvent.values[0]);
-	        ySensorData.add(sensorEvent.values[1]);
-	        zSensorData.add(sensorEvent.values[2]);
-	        mClasses.add(mMode);
-	        mPositions.add(mPosition);
+	        if(mIsCountdown){
+		        timeStamps.add(curTime);
+		        xSensorData.add(sensorEvent.values[0]);
+		        ySensorData.add(sensorEvent.values[1]);
+		        zSensorData.add(sensorEvent.values[2]);
+		        mClasses.add(mMode);
+		        mPositions.add(mPosition);
+	        }
 	        
 //	        Log.d(DEBUG_TAG,"adding sensor event "+count+ " at "+curTime);
 	        //sensorEvents.add(sensorEvent);
@@ -270,7 +323,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	private class UpdateTimerLabel extends AsyncTask<Integer,Integer,Integer>{
 		@Override
 		protected Integer doInBackground(Integer... arg0) {
-			while (mIsCountdown) {
+			while (mTimerValid) {
 	            try {
 	                Thread.sleep(1000);
 	                publishProgress(arg0);
@@ -285,6 +338,8 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		
 		protected void onProgressUpdate(Integer... progress) {
 	        updateTimerTextView(); // Call to method in UI
+	        if(mCheckState)
+	        	checkSwitchState();
 	    }
 	}
 	private class FeaturesTask extends AsyncTask<String,Void,Void>{

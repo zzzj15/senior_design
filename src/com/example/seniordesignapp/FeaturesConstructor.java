@@ -44,7 +44,7 @@ public class FeaturesConstructor{
 	private List<Acceleration> accelerations = new ArrayList<Acceleration>();
 	private SQLiteDatabase mDb;
 	private Context mContext;
-	private int SAMPLE_SIZE = 200; //1000 works but not many sets of data will be generated
+	private int SAMPLE_SIZE = 100; //1000 works but not many sets of data will be generated
 	private final int BIN_SIZE = 10;  
 	private Cursor mCursor;
 	private FileOutputStream outputStream;
