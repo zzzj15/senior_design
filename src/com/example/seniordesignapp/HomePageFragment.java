@@ -5,15 +5,19 @@ import java.util.ArrayList;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.Gravity;
 import android.widget.AbsListView;
 import android.widget.BaseExpandableListAdapter;
@@ -21,6 +25,8 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -33,7 +39,8 @@ import com.google.android.maps.*;
 //import com.handmark.pulltorefresh.library.PullToRefreshExpandableListView;
 
 public class HomePageFragment extends Fragment {
-
+	
+	ImageView GLcheck;
 	ExpandableListView lv;
 	ToggleButton tButton;
     private DatabaseHelper mDbHelper;
@@ -41,7 +48,10 @@ public class HomePageFragment extends Fragment {
     private SQLiteDatabase mDb;
     private Cursor mCursor;
     private static String TAG = "HomePageFramentDynamicLog";
-	//String timeStamp;
+    ProgressBar GLprogressBar;
+    final int GL_LIMIT = 70; //Scale to 70% as it is 100%
+
+	//Testing String timeStamp;
 	private String[] groups;
 	private Button refreshButton;
 	class MyExpandableListAdapter extends BaseExpandableListAdapter implements ExpandableListView.OnChildClickListener, OnClickListener {
@@ -228,6 +238,55 @@ public class HomePageFragment extends Fragment {
 
 
 	}
+	
+	
+	public class ShowCustomProgressBarAsyncTask extends
+			AsyncTask<Void, Integer, Void> {
+
+		int myProgress;
+		int currentGL;
+		int limitGL;
+
+		public ShowCustomProgressBarAsyncTask(int GL, int limit) {
+			currentGL = GL;
+			limitGL = limit;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+
+		}
+
+		@Override
+		protected void onPreExecute() {
+			myProgress = 0;
+			// GLprogressBar.setSecondaryProgress(0);
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			while (myProgress < currentGL) {
+				myProgress++;
+				publishProgress(myProgress);
+				SystemClock.sleep(20);
+			}
+
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			if (currentGL <= limitGL) {
+				GLprogressBar.setProgress(values[0]);
+			} else if ((currentGL >= limitGL) && (currentGL < 100)) {
+				GLprogressBar.setProgress(0);
+				GLprogressBar.setSecondaryProgress(values[0]);
+			} else {
+				GLprogressBar.setProgress(0);
+				GLprogressBar.setSecondaryProgress(100);
+			}
+		}
+	}
 
 	Gauge meter; 
 	//Button add;
@@ -248,9 +307,21 @@ public class HomePageFragment extends Fragment {
 		LinearLayout mlinearLayout = (LinearLayout) inflater.inflate(
 				R.layout.activity_home_page, container, false);
 		
-		TotalGL = (TextView) mlinearLayout.findViewById(R.id.textView2);
+		mlinearLayout.setOnTouchListener(new OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				// TODO Auto-generated method stub
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			        showToastMessage("Touched!!");
+			        return true;
+			    }
+				return false;
+			}
+		});
 		
-	
+		
+		TotalGL = (TextView) mlinearLayout.findViewById(R.id.textView2);	
 	//String tempGl=mCursor.getString(mCursor.getColumnIndex("GPS_time"));
 		String sql = "SELECT SUM(GL) AS TotalGL FROM foodGPS";
 		mDbHelper = new DatabaseHelper(getActivity());
@@ -258,7 +329,10 @@ public class HomePageFragment extends Fragment {
 		mCursor = mDb.rawQuery(sql,null);
 		mCursor.moveToFirst();	
 		String tempGl=mCursor.getString(mCursor.getColumnIndex("TotalGL"));
-		TotalGL.setText(tempGl);
+		if (tempGl == null)
+			TotalGL.setText("0");
+		else
+			TotalGL.setText(tempGl);
 		//TotalGL.setTextColor(-16711681);
 		//TotalGL.setText(temporaryGL);
 		//meter = (Gauge) mlinearLayout.findViewById(R.id.meter);
@@ -286,7 +360,29 @@ public class HomePageFragment extends Fragment {
 
 			}
 		});
-
+		
+		GLprogressBar = (ProgressBar) mlinearLayout.findViewById(R.id.GLprogressBar);
+		GLcheck = (ImageView) mlinearLayout.findViewById(R.id.gl_check);
+		int anything;
+		//boolean a = tempGl.isEmpty();
+		if (tempGl == null){
+			anything = 0;
+			GLprogressBar.setProgress(0);
+			//GLprogressBar.setSecondaryProgress(50);
+		}	
+		else {
+		 anything = Integer.parseInt(tempGl);
+		 //GLprogressBar.setProgress(Integer.parseInt(tempGl));
+		 new ShowCustomProgressBarAsyncTask(Integer.parseInt(tempGl),GL_LIMIT).execute(); 
+			if ( anything > GL_LIMIT ){
+				GLcheck.setImageResource(R.drawable.ic_delete);
+			}
+			else
+				GLcheck.setImageResource(R.drawable.btn_check_buttonless_on);
+		}
+		
+		
+		
 		lv = (ExpandableListView) mlinearLayout.findViewById(R.id.log_list);
 		MyExpandableListAdapter expandableAdapter = new MyExpandableListAdapter();
 		lv.setAdapter(expandableAdapter);
