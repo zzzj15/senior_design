@@ -5,10 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,8 +20,6 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
@@ -161,8 +157,20 @@ public class FeaturesConstructor{
 	    }
 	}
 	private String getName(int position,String mode){
-		String temp = mode.substring(0, 1)+position;
-		return temp;
+		//String temp = mode.substring(0, 1)+position;
+		if(mode.contains("sitting"))
+			return mode;
+		else{
+			if(position==0)
+				return mode+"_hand";
+			else if(position==1)
+				return mode+"_pocket";
+			else if(position==2)
+				return mode+"_hand_text";
+			else
+				return mode;
+		}
+	
 	}
 	private int retrieveSensorData(String mode,int Position) throws IOException{ //retrieve sensor data from database
 		int ret=0;																	//returns 1 if query result is nonempty
@@ -217,18 +225,28 @@ public class FeaturesConstructor{
 		if(test==false){
 			FileOutputStream oStream = mContext.openFileOutput("training_log_"+currentDateandTime, Context.MODE_PRIVATE);
 			Log.d(DEBUG_TAG,"Training!");
-			String[] options = new String[4];
-			options[0] = "-t";
-			options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-			options[2] = "-d";
-			options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
-			Log.d(DEBUG_TAG,options[1]);
-			if(algo==true){
+//			String[] options = new String[4];
+//			options[0] = "-t";
+//			options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+//			options[2] = "-d";
+//			options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
+			if(algo==true){//j48
+				String[] options = new String[5];
+				options[0] = "-t";
+				options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+				options[2] = "-d";
+				options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
+				options[4] = "-U";
 				String result = Evaluation.evaluateModel(new J48(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
 			}
 			else{
+				String[] options = new String[4];
+				options[0] = "-t";
+				options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
+				options[2] = "-d";
+				options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
 				String result = Evaluation.evaluateModel(new NaiveBayes(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
@@ -280,22 +298,30 @@ public class FeaturesConstructor{
 		
 		String pre = getPre(test); //decide the prefix for the output file
 		
-		File[] fileArr = new File[12];
+		//File[] fileArr = new File[12];
 		String[] filePre = {"r","w","s"};
-		String[] fName = new String[12];
+		ArrayList<File> fileArr = new ArrayList<File>();
+		ArrayList<String> fName = new ArrayList<String>();
+		//String[] fName = new String[12];
+		int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
 		for(int i=0;i<3;++i){
-			for(int j=0;j<4;++j){
-				fName[4*i+j] = pre+filePre[i]+j+".arff";
-				fileArr[4*i+j] = mContext.getFileStreamPath(fName[4*i+j]); //"activity_classification_r1.arff"
+			for(int j=0;j<posNum[i];++j){
+				String t = pre+filePre[i]+j+".arff";
+				fName.add(t);
+				fileArr.add(mContext.getFileStreamPath(t));
+//				fName[4*i+j] = pre+filePre[i]+j+".arff";
+//				fileArr[4*i+j] = mContext.getFileStreamPath(fName[4*i+j]); //"activity_classification_r1.arff"
 			}
 		}
 		//check if all files exist
 		boolean allExist = true;
-		boolean[] fileExistArr = new boolean[12];
-		for(int i=0;i<12;i++){
-			allExist = allExist && fileArr[i].exists();
-			if(fileArr[i].exists()==false){
-				Log.d(DEBUG_TAG,fileArr[i].getName()+"DOES NOT EXIST");
+		int numFiles = fileArr.size();
+		boolean[] fileExistArr = new boolean[numFiles];
+		for(int i=0;i<numFiles;i++){
+//			allExist = allExist && fileArr[i].exists();
+			allExist = allExist && fileArr.get(i).exists();
+			if(fileArr.get(i).exists()==false){
+				Log.d(DEBUG_TAG,fileArr.get(i).getName()+"DOES NOT EXIST");
 				fileExistArr[i]=false;
 			}
 			else
@@ -306,19 +332,21 @@ public class FeaturesConstructor{
 			BufferedReader br;
 			int startFileNum = 0;
 			if(!allExist){
-				 for(int i=0;i<12;i++){
+				 for(int i=0;i<numFiles;i++){
 					 if(fileExistArr[i]==true){
 						startFileNum = i;
 						break;
 					 }
 				 }
 			}
-			br = new BufferedReader(new FileReader(fileArr[startFileNum]));
+//			br = new BufferedReader(new FileReader(fileArr[startFileNum]));
+			br = new BufferedReader(new FileReader(fileArr.get(startFileNum)));
 			String sCurrentLine;
 			while ((sCurrentLine = br.readLine()) != null) {
 				if(sCurrentLine.equals("@attribute class string")){
 					//outputStream.write("@attribute class {running,walking,sitting}".getBytes());
-					outputStream.write("@attribute class {r0,r1,r2,r3,w0,w1,w2,w3,s0,s1,s2,s3}".getBytes());
+					outputStream.write("@attribute class {running_hand,running_pocket,walking_hand,walking_pocket,walking_hand_text,sitting}".getBytes());
+//					outputStream.write("@attribute class {r0,r1,r2,r3,w0,w1,w2,w3,s0,s1,s2,s3}".getBytes());
 					outputStream.write("\n".getBytes());
 				}
 				else{
@@ -328,9 +356,9 @@ public class FeaturesConstructor{
 			}
 			br.close();
 			//continue reading the rest files
-			for(int i=startFileNum;i<12;i++){
+			for(int i=startFileNum;i<numFiles;i++){
 				if(fileExistArr[i]==true){
-					br = new BufferedReader(new FileReader(fileArr[i]));
+					br = new BufferedReader(new FileReader(fileArr.get(i)));
 					boolean toWrite = false;
 					while ((sCurrentLine = br.readLine()) != null) {
 						if(toWrite){
@@ -345,9 +373,6 @@ public class FeaturesConstructor{
 			}
 			outputStream.close();
 			//copy test data to SDcard
-			
-			
-			
 			File sdcard = Environment.getExternalStorageDirectory();
 			
 			File src= new File(mContext.getFileStreamPath(fileName).getAbsolutePath());
@@ -401,8 +426,12 @@ public class FeaturesConstructor{
 		createFoldersonSD();
 		String[] modes = {"running","walking","sitting"};
 		File dir = mContext.getFilesDir();
+		
+		
+		int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
+		
 		for(int i=0;i<3;++i){
-			for(int j=0;j<4;++j){ //j is position
+			for(int j=0;j<posNum[i];++j){ //j is position
 				int isNotEmpty = retrieveSensorData(modes[i],j);//look for all activities in all positions if any data was saved from the database
 				if(isNotEmpty==1){
 					outputStream = mContext.openFileOutput("test_"+modes[i].substring(0,1)+j+".arff", Context.MODE_PRIVATE);
