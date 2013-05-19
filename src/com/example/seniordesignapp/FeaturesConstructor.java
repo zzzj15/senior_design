@@ -159,7 +159,7 @@ public class FeaturesConstructor{
 	private String getName(int position,String mode){
 		//String temp = mode.substring(0, 1)+position;
 		if(mode.contains("sitting"))
-			return mode;
+			return "still";
 		else{
 			if(position==0)
 				return mode+"_hand";
@@ -170,7 +170,6 @@ public class FeaturesConstructor{
 			else
 				return mode;
 		}
-	
 	}
 	private int retrieveSensorData(String mode,int Position) throws IOException{ //retrieve sensor data from database
 		int ret=0;																	//returns 1 if query result is nonempty
@@ -218,10 +217,10 @@ public class FeaturesConstructor{
 		String currentDateandTime = dateFormat.format(new Date());
 		return currentDateandTime;
 	}
-	private void evaluateResult(boolean algo,boolean test,String fileName,String classifierFileName) throws Exception{
+	private String evaluateResult(boolean algo,boolean test,String fileName,String classifierFileName) throws Exception{
 		/* generate classifier*/
 		String currentDateandTime = getCurrentTime();
-		
+		String result;
 		if(test==false){
 			FileOutputStream oStream = mContext.openFileOutput("training_log_"+currentDateandTime, Context.MODE_PRIVATE);
 			Log.d(DEBUG_TAG,"Training!");
@@ -237,7 +236,7 @@ public class FeaturesConstructor{
 				options[2] = "-d";
 				options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
 				options[4] = "-U";
-				String result = Evaluation.evaluateModel(new J48(), options);
+				result = Evaluation.evaluateModel(new J48(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
 			}
@@ -247,7 +246,7 @@ public class FeaturesConstructor{
 				options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
 				options[2] = "-d";
 				options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
-				String result = Evaluation.evaluateModel(new NaiveBayes(), options);
+				result = Evaluation.evaluateModel(new NaiveBayes(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
 			}
@@ -262,7 +261,7 @@ public class FeaturesConstructor{
 				options[1] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
 				options[2] = "-T";
 				options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-				String result = Evaluation.evaluateModel(new J48(), options);
+				result = Evaluation.evaluateModel(new J48(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
 			}
@@ -273,7 +272,7 @@ public class FeaturesConstructor{
 				options[2] = "-T";
 				options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
 				options[4] = "-o";
-				String result = Evaluation.evaluateModel(new NaiveBayes(), options);
+				result = Evaluation.evaluateModel(new NaiveBayes(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
 			}
@@ -293,9 +292,11 @@ public class FeaturesConstructor{
 		}
 			
 		copy(src,dst);
+		return result;
 	}
-	private void constructFinalFile(boolean algo,boolean test ) throws Exception{
+	private String constructFinalFile(boolean algo,boolean test ) throws Exception{
 		
+		String ret;
 		String pre = getPre(test); //decide the prefix for the output file
 		
 		//File[] fileArr = new File[12];
@@ -345,7 +346,7 @@ public class FeaturesConstructor{
 			while ((sCurrentLine = br.readLine()) != null) {
 				if(sCurrentLine.equals("@attribute class string")){
 					//outputStream.write("@attribute class {running,walking,sitting}".getBytes());
-					outputStream.write("@attribute class {running_hand,running_pocket,walking_hand,walking_pocket,walking_hand_text,sitting}".getBytes());
+					outputStream.write("@attribute class {running_hand,running_pocket,walking_hand,walking_pocket,walking_hand_text,still}".getBytes());
 //					outputStream.write("@attribute class {r0,r1,r2,r3,w0,w1,w2,w3,s0,s1,s2,s3}".getBytes());
 					outputStream.write("\n".getBytes());
 				}
@@ -392,9 +393,11 @@ public class FeaturesConstructor{
 				myInput.close();
 		        oStream.close();
 			}
-			evaluateResult(algo,test,fileName,classifierFileName);
+			ret = evaluateResult(algo,test,fileName,classifierFileName);
 		}
-		
+		else
+			ret = "No Test Results";
+		return ret;
 	}
 	private void createFoldersonSD(){
 		createFolderonSD("seniordesigndata");
@@ -422,7 +425,7 @@ public class FeaturesConstructor{
 		mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
 		mDb.close();
 	}
-	public void constructTestFeature(boolean algo) throws Exception{
+	public String constructTestFeature(boolean algo) throws Exception{
 		createFoldersonSD();
 		String[] modes = {"running","walking","sitting"};
 		File dir = mContext.getFilesDir();
@@ -451,10 +454,11 @@ public class FeaturesConstructor{
 				}
 			}
 		}
-		constructFinalFile(algo, true); //true - J48, test is true
+		String ret = constructFinalFile(algo, true); //true - J48, test is true
 		/* We don't need the data for calibration*/
 		mDb.execSQL("DROP TABLE " + DatabaseHelper.ACCELS_TABLE_NAME);
 		mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
 		mDb.close();
+		return ret;
 	}
 }

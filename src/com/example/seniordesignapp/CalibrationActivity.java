@@ -40,7 +40,7 @@ public class CalibrationActivity extends Activity implements SensorEventListener
 	private SQLiteDatabase mDb;
 	private List<SensorEvent> sensorEvents;
 	
-	private final int countdownPeriod = 180; //3 Minutes
+	private final int countdownPeriod = 30; //3 Minutes
 	
 	private TextView mCountdownTv;
 	private Button mStartButton;

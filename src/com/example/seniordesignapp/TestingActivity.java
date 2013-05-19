@@ -6,6 +6,8 @@ import java.util.List;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -60,6 +62,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	private AsyncTask<Integer, Integer, Integer> mUpdateTimer;
 	private int mCnt;
 	private boolean mCheckState,mTimerValid;
+	private String mResult;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -146,6 +149,8 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 					mTimerValid = false;
 					mIsCountdown = false;
 					mStartButton.setText("Start");
+			
+
 				}
 				
 			}
@@ -346,14 +351,31 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		@Override
 		protected Void doInBackground(String... arg0) {
 			try {
-				new FeaturesConstructor(getApplicationContext()).constructTestFeature(true); //j48-true,naivebayes-false,with class name
+				mResult = new FeaturesConstructor(getApplicationContext()).constructTestFeature(true); //j48-true,naivebayes-false,with class name
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;
 		}
+		 @Override
+		    protected void onPostExecute(Void result) {
+			 AlertDialog.Builder builder = new AlertDialog.Builder(TestingActivity.this);
+				builder.setMessage(mResult)
+						.setCancelable(false)
+						.setPositiveButton("OK",
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										dialog.cancel();
+
+									}
+								});
+				builder.show();
+			 return;
+		    }
 	}
 }
