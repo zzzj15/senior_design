@@ -25,29 +25,29 @@
         android:orientation="vertical" >
 
      <RadioButton
-         android:id="@+id/right_hand"
+         android:id="@+id/hand"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:checked="true"
-         android:text="right hand" />
+         android:text="hand" />
      <RadioButton
-         android:id="@+id/left_hand"
+         android:id="@+id/pocket"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:checked="false"
-         android:text="left hand" />
+         android:text="pocket" />
      <RadioButton
-         android:id="@+id/pocket_face_down"
+         android:id="@+id/hand_text"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:checked="false"
-         android:text="pocket face down" />
-     <RadioButton
-         android:id="@+id/pocket_face_up"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:checked="false"
-         android:text="pocket face up"/>
+         android:text="hand text" />
+<!--      <RadioButton -->
+<!--          android:id="@+id/pocket_face_up" -->
+<!--          android:layout_width="wrap_content" -->
+<!--          android:layout_height="wrap_content" -->
+<!--          android:checked="false" -->
+<!--          android:text=" "/> -->
 	</RadioGroup>
 	<RadioGroup
         android:id="@+id/statusGroup"

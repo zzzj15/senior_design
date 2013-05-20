@@ -39,7 +39,7 @@ public class CalibrationFragment extends Fragment {
 		RadioButton rhButton = (RadioButton) mRelativeLayout.findViewById(R.id.right_hand);
 		RadioButton lhButton = (RadioButton) mRelativeLayout.findViewById(R.id.left_hand);
 		RadioButton pdButton = (RadioButton) mRelativeLayout.findViewById(R.id.pocket_face_down);
-		RadioButton puButton = (RadioButton) mRelativeLayout.findViewById(R.id.pocket_face_up);
+//		RadioButton puButton = (RadioButton) mRelativeLayout.findViewById(R.id.pocket_face_up);
 		
 		mPosition = 0;
 		
@@ -60,10 +60,10 @@ public class CalibrationFragment extends Fragment {
             	   mPosition = 2;
 //            	   	Log.d(DEBUG_TAG,"position "+mPosition);
                }
-               if(checkedId == R.id.pocket_face_up){
-            	   mPosition = 3;
-//            	   	Log.d(DEBUG_TAG,"position "+mPosition);
-               }
+//               if(checkedId == R.id.pocket_face_up){
+//            	   mPosition = 3;
+////            	   	Log.d(DEBUG_TAG,"position "+mPosition);
+//               }
 			}
           });
 		
