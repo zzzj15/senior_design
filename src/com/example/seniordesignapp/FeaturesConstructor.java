@@ -44,7 +44,7 @@ public class FeaturesConstructor{
 	private List<Acceleration> accelerations = new ArrayList<Acceleration>();
 	private SQLiteDatabase mDb;
 	private Context mContext;
-	private int SAMPLE_SIZE = 100; //1000 works but not many sets of data will be generated
+	private int SAMPLE_SIZE = 50; //1000 works but not many sets of data will be generated
 	private final int BIN_SIZE = 10;  
 	private Cursor mCursor;
 	private FileOutputStream outputStream;
@@ -117,8 +117,8 @@ public class FeaturesConstructor{
 			data.add(new DenseInstance(1.0, vals));
 		}
 //		data.attribute(data.numAttributes()-2).setWeight(2.0);
-//		data.attribute(4).setWeight(10); // more weight for period
-//		data.attribute(19).setWeight(10);
+		data.attribute(4).setWeight(10); // more weight for period
+		data.attribute(19).setWeight(10);
 //		data.attribute(34).setWeight(10);
 	    return data;
 	}
@@ -171,7 +171,35 @@ public class FeaturesConstructor{
 				return mode;
 		}
 	}
-	private int retrieveSensorData(String mode,int Position) throws IOException{ //retrieve sensor data from database
+//	private int retrieveSensorData(String mode,int Position) throws IOException{ //retrieve sensor data from database
+//		int ret=0;																	//returns 1 if query result is nonempty
+//		if(mode == ""){ //retrieve all data from database, when data is not mixed
+//			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
+//					+" ORDER BY timestamp ASC",null);
+//		}
+//		else{
+//			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
+//					+" WHERE class like '%"+mode+"%' AND position = "+Position+ " ORDER BY timestamp ASC",null);
+//		}
+//
+//		if(mCursor.getCount()>0){
+//			Log.d(DEBUG_TAG,"number of points returned from database "+mCursor.getCount());
+//			mCursor.moveToFirst();
+//			long timeSt=0;
+//			long endTime = mCursor.getLong(4);
+//			while(!mCursor.isAfterLast()){
+//				timeSt = mCursor.getLong(4);
+//				accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
+//						mCursor.getFloat(3),timeSt));
+//				mCursor.moveToNext();
+//			}
+//			Log.d(DEBUG_TAG,"time interval is "+(endTime-timeSt));
+//			ret = 1;
+//		}
+//		mCursor.close();
+//		return ret;
+//	}
+	private int retrieveSensorData(String mode,int Position,int StateNum) throws IOException{ //retrieve sensor data from database
 		int ret=0;																	//returns 1 if query result is nonempty
 		if(mode == ""){ //retrieve all data from database, when data is not mixed
 			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
@@ -179,7 +207,7 @@ public class FeaturesConstructor{
 		}
 		else{
 			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
-					+" WHERE class like '%"+mode+"%' AND position = "+Position+ " ORDER BY timestamp ASC",null);
+					+" WHERE class like '%"+mode+"%' AND position = "+Position+ " AND state = "+StateNum+" ORDER BY timestamp ASC",null);
 		}
 
 		if(mCursor.getCount()>0){
@@ -410,7 +438,7 @@ public class FeaturesConstructor{
 		outputStream = mContext.openFileOutput(pre+mode.substring(0,1)+position+".arff", Context.MODE_PRIVATE);
 		
 		/* Get the just-recorded accelerations from db and construct a feature from every 200 datapoints*/
-		retrieveSensorData("",0); //retrieve all data from database
+		retrieveSensorData("",0,0); //retrieve all data from database
 		for (int i =0;i<accelerations.size()/SAMPLE_SIZE;i++){
 			List<Acceleration> samples = accelerations.subList(i*SAMPLE_SIZE, SAMPLE_SIZE*(i+1)-1);
 			features.add(new Feature(samples));
@@ -425,23 +453,31 @@ public class FeaturesConstructor{
 		mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
 		mDb.close();
 	}
-	public String constructTestFeature(boolean algo) throws Exception{
+	public String constructTestFeature(boolean algo,int numStates) throws Exception{
 		createFoldersonSD();
 		String[] modes = {"running","walking","sitting"};
 		File dir = mContext.getFilesDir();
 		
 		
 		int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
-		
 		for(int i=0;i<3;++i){
 			for(int j=0;j<posNum[i];++j){ //j is position
-				int isNotEmpty = retrieveSensorData(modes[i],j);//look for all activities in all positions if any data was saved from the database
-				if(isNotEmpty==1){
-					outputStream = mContext.openFileOutput("test_"+modes[i].substring(0,1)+j+".arff", Context.MODE_PRIVATE);
-					for (int k =0;k<accelerations.size()/SAMPLE_SIZE;k++){
-						List<Acceleration> samples = accelerations.subList(k*SAMPLE_SIZE, SAMPLE_SIZE*(k+1)-1);
-						features.add(new Feature(samples));
+				features = new ArrayList<Feature>();
+				boolean toDelete = true;
+				int isNotEmpty;
+				outputStream = mContext.openFileOutput("test_"+modes[i].substring(0,1)+j+".arff", Context.MODE_PRIVATE);
+				for(int k=0;k<=numStates;++k){
+					isNotEmpty = retrieveSensorData(modes[i],j,k);//look for all activities in all positions if any data was saved from the database
+					if(isNotEmpty==1){
+						Log.d(DEBUG_TAG,"state is"+ k);
+						toDelete = false;
+						for (int kk =0;kk<accelerations.size()/SAMPLE_SIZE;kk++){
+							List<Acceleration> samples = accelerations.subList(kk*SAMPLE_SIZE, SAMPLE_SIZE*(kk+1)-1);
+							features.add(new Feature(samples));
+						}
 					}
+				}
+				if(toDelete==false){
 					Instances data = constructInstances(features,modes[i],true,j);
 					outputStream.write(data.toString().getBytes());
 					outputStream.close();
@@ -454,6 +490,27 @@ public class FeaturesConstructor{
 				}
 			}
 		}
+//		for(int i=0;i<3;++i){
+//			for(int j=0;j<posNum[i];++j){ //j is position
+//				int isNotEmpty = retrieveSensorData(modes[i],j);//look for all activities in all positions if any data was saved from the database
+//				if(isNotEmpty==1){
+//					outputStream = mContext.openFileOutput("test_"+modes[i].substring(0,1)+j+".arff", Context.MODE_PRIVATE);
+//					for (int k =0;k<accelerations.size()/SAMPLE_SIZE;k++){
+//						List<Acceleration> samples = accelerations.subList(k*SAMPLE_SIZE, SAMPLE_SIZE*(k+1)-1);
+//						features.add(new Feature(samples));
+//					}
+//					Instances data = constructInstances(features,modes[i],true,j);
+//					outputStream.write(data.toString().getBytes());
+//					outputStream.close();
+//				}
+//				else{ // delete files not used in this calibration
+//					File file = new File(dir, "test_"+modes[i].substring(0,1)+j+".arff");
+//					boolean deleted = file.delete();
+//					if(deleted)
+//						Log.d(DEBUG_TAG,"deleted"+file.getAbsolutePath().toString());
+//				}
+//			}
+//		}
 		String ret = constructFinalFile(algo, true); //true - J48, test is true
 		/* We don't need the data for calibration*/
 		mDb.execSQL("DROP TABLE " + DatabaseHelper.ACCELS_TABLE_NAME);

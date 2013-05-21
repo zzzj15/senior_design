@@ -49,6 +49,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	
 	private TextView mCounter;
 	private Button mStartButton;
+	private RadioButton mHandButton,mPocketButton,mHandTextButton;
 	
 	private boolean mIsCountdown;
 	private String mMode;
@@ -57,12 +58,14 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	private ArrayList<Float> xSensorData,ySensorData,zSensorData;
 	private ArrayList<String> mClasses;
 	private ArrayList<Integer> mPositions;
+	private ArrayList<Integer> mStateNums;
 	private boolean mTest,mAlgo;
 	private int mCount,mPosition;
 	private AsyncTask<Integer, Integer, Integer> mUpdateTimer;
 	private int mCnt;
 	private boolean mCheckState,mTimerValid;
 	private String mResult;
+	private int mNumStates;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -73,6 +76,9 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		mRadioPositionGroup = (RadioGroup) findViewById(R.id.positionGroup);
 		mRadioStatusGroup.setOnCheckedChangeListener(this);
 		mStartButton = (Button) findViewById(R.id.start_button);
+		mHandButton = (RadioButton) findViewById(R.id.hand);
+		mPocketButton = (RadioButton) findViewById(R.id.pocket);
+		mHandTextButton = (RadioButton) findViewById(R.id.hand_text);
 		mCounter = (TextView) findViewById(R.id.timer);
 		mCounter.setText("0:00");
 		
@@ -123,6 +129,8 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		zSensorData = new ArrayList<Float>();
 		mClasses = new ArrayList<String>();
 		mPositions = new ArrayList<Integer>();
+		mStateNums = new ArrayList<Integer>();
+		mNumStates = 0;
 		
 		mStartButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -135,6 +143,8 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 					zSensorData = new ArrayList<Float>();
 					mClasses = new ArrayList<String>();
 					mPositions = new ArrayList<Integer>();
+					mStateNums = new ArrayList<Integer>();
+					mNumStates = 0;
 					switchState();//mIsCountdown = true;
 					mTimerValid = true;
 					mUpdateTimer = new UpdateTimerLabel();
@@ -160,6 +170,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		mRadioPositionGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				mNumStates++;
             	if(checkedId == R.id.hand){
         			mPosition = 0;
         			switchState();
@@ -201,6 +212,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	
 	@Override
 	public void onCheckedChanged(RadioGroup group, int checkedId) {
+		mNumStates++;
 		if(checkedId == R.id.Run){
 			mMode = "running";
 			switchState();
@@ -217,6 +229,9 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
     	   mMode = "sitting";
     	   switchState();
     	   removeRecords();
+    	   mHandButton.setSelected(true);
+    	   mPocketButton.setSelected(false);
+    	   mHandTextButton.setSelected(false);
 //    	   Log.d(DEBUG_TAG,mMode);
        }
      
@@ -241,6 +256,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 	        	zSensorData.remove(zSensorData.size()-1);
 	        	mClasses.remove(mClasses.size()-1);
 	        	mPositions.remove(mPositions.size()-1);
+	        	mStateNums.remove(mStateNums.size()-1);
 	        }
 		}
 	}
@@ -284,6 +300,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		        zSensorData.add(sensorEvent.values[2]);
 		        mClasses.add(mMode);
 		        mPositions.add(mPosition);
+		        mStateNums.add(mNumStates);
 	        }
 	        
 //	        Log.d(DEBUG_TAG,"adding sensor event "+count+ " at "+curTime);
@@ -312,7 +329,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 			try{
 				for (int i=0;i<timeStamps.size();i++){
 					mDb.execSQL("INSERT INTO "+ DatabaseHelper.ACCELS_TABLE_NAME +" VALUES ( NULL, "+ xSensorData.get(i)
-							+", "+ ySensorData.get(i) + ", " + zSensorData.get(i) + ", " + timeStamps.get(i)+ ", \"" + mClasses.get(i)+"\", "+mPositions.get(i)+" );");
+							+", "+ ySensorData.get(i) + ", " + zSensorData.get(i) + ", " + timeStamps.get(i)+ ", \"" + mClasses.get(i)+"\", "+mStateNums.get(i)+", "+mPositions.get(i)+" );");
 				}
 				mDb.setTransactionSuccessful();
 				timeStamps = new ArrayList<Long>();
@@ -351,7 +368,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		@Override
 		protected Void doInBackground(String... arg0) {
 			try {
-				mResult = new FeaturesConstructor(getApplicationContext()).constructTestFeature(true); //j48-true,naivebayes-false,with class name
+				mResult = new FeaturesConstructor(getApplicationContext()).constructTestFeature(true,mNumStates); //j48-true,naivebayes-false,with class name
 				
 			} catch (IOException e) {
 				e.printStackTrace();

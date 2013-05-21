@@ -175,12 +175,12 @@ public class Feature {
 //		timePeaks[1] =peakDet(accelerations,'y',0.05);
 //		timePeaks[2] =peakDet(accelerations,'z',0.05);
 		double xthres=0,ythres=0;
-		if(statsX.getMax()-statsX.getMin()<0.7)
-			xthres = 1;
+		if(statsX.getMax()-statsX.getMin()<1.5)
+			xthres = 3.1;
 		else
 			xthres = statsX.getMax()-statsX.getMin();
-		if(statsY.getMax()-statsY.getMin()<0.7)
-			ythres = 1;
+		if(statsY.getMax()-statsY.getMin()<1.5)
+			ythres = 3.1;
 		else
 			ythres = statsY.getMax()-statsY.getMin();
 		
