@@ -27,11 +27,13 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,6 +41,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -79,6 +82,9 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
     SharedPreferences GLdata;
     public static String filename = "MySharedString";
     String glvalue = "" ;
+    
+    // Serving Size
+    private TextView Serve_Size; 
     
     // Testing Variables
     private static String FOOD_TEST = "Testing_FoodTrackingActivity";
@@ -289,7 +295,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		ArrayList<String> sData = new ArrayList<String>();
 		if(out.substring(out.length() - 1).equals("s"))
 			out=out.substring(0, out.length()-1);
-		String sql = "SELECT _ID,GL,food_name FROM food WHERE lower(food_name) LIKE lower('%"+out+"%');";
+		String sql = "SELECT _ID,GL,Serve_Size,food_name FROM food WHERE lower(food_name) LIKE lower('%"+out+"%');";
 		mCursor = mDb.rawQuery(sql, null);
 		//if there is a match
 		if(mCursor.getCount()>0){ //now it is taking the first match WIP fix later
@@ -696,6 +702,29 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	        mlv.setAdapter(new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_single_choice, sData));
 	        mlv.setItemsCanFocus(false);
 		    mlv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		    Serve_Size = (TextView) mlinearLayout.findViewById(R.id.servesize);
+		    
+		mlv.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1,
+					int position, long arg3) {
+
+				mDbHelper = new DatabaseHelper(getActivity());
+				mDb = mDbHelper.getWritableDatabase();
+				String sql = "SELECT Serve_Size FROM food WHERE lower(food_name) LIKE lower('%"
+						+ mlv.getItemAtPosition(position).toString() + "%');";
+				Cursor crs = mDb.rawQuery(sql, null);
+
+				crs.moveToFirst();
+
+				int serve_size = crs.getInt(crs.getColumnIndex("Serve_Size"));
+				Serve_Size.setText("("+serve_size + " grams)");
+				mDb.close();
+				// showToastMessage(mlv.getItemAtPosition(position).toString());
+
+			}
+		});
 	        
 		    SharedPreferences.Editor editor = GLdata.edit();
 		    	  		editor.putString("TotalGL", glvalue);
@@ -713,6 +742,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	        });
 	        
 	        mbtConfirm = (Button) mlinearLayout.findViewById(R.id.confirmbutton);
+	        
 	        
 	        //mbtConfirm.setEnabled(false);
 	        mbtConfirm.setOnClickListener(new View.OnClickListener() {
@@ -751,8 +781,10 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 	            	  //lon = 5.2;
 	            	  //lat = 5.2;
 	            	  //Get the position of user's selection
-	            	  int pos = mlv.getCheckedItemPosition();
+	            	 int pos = mlv.getCheckedItemPosition();
 	            	 int spinner_pos =  spin_amount.getSelectedItemPosition();
+	            	 
+	            	 
 	            	 
 //	            	ArrayList<Integer> foodIDs = new ArrayList<Integer>();
 	            	ArrayList<Integer> GLs = new ArrayList<Integer>();
@@ -764,11 +796,12 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		          				while (!mCursor.isAfterLast()) {
 		          					int gl = mCursor.getInt(mCursor.getColumnIndex("GL"));
 		    	          			GLs.add(gl);
+
 		    	          			mCursor.moveToNext();
 		          				}
 		          			  if((pos>=0) && spinner_pos > 0){ //if listview selected
 		          				  String fName = mlv.getItemAtPosition(pos).toString();
-		          				  
+		          				            				  
 		          				  uponConfirm(fName+"\n"+" Quantity: "+spinner_pos+"\n "+"Is this correct?",spinner_pos,pos,GLs.get(pos),fName);
 		          				  
 		          			  }
