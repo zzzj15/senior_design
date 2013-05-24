@@ -165,12 +165,20 @@
         android:scrollbars="vertical"
        />
     	<TextView
+        android:id="@+id/servesize"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:text=""
+        android:paddingTop = "10dp"
+        android:layout_below="@+id/foodlist"/>
+    	<TextView
         android:id="@+id/quantity"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:text="                    Quantity           "
+        android:text=" Serve Size    x      "
         android:paddingTop = "10dp"
-        android:layout_below="@+id/foodlist"/>
+        android:layout_below="@+id/foodlist"
+        android:layout_toRightOf="@+id/servesize"/>
     	<Spinner
 		android:id="@+id/spinner"
 		android:prompt="@string/select_prompt"
