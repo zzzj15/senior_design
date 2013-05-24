@@ -78,7 +78,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
 		mStartButton = (Button) findViewById(R.id.start_button);
 		mHandButton = (RadioButton) findViewById(R.id.hand);
 		mPocketButton = (RadioButton) findViewById(R.id.pocket);
-		mHandTextButton = (RadioButton) findViewById(R.id.hand_text);
+//		mHandTextButton = (RadioButton) findViewById(R.id.hand_text);
 		mCounter = (TextView) findViewById(R.id.timer);
 		mCounter.setText("0:00");
 		
@@ -183,12 +183,12 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
             	   switchState();
 //            		Log.d(DEBUG_TAG,"position "+mPosition);
                }
-               if(checkedId == R.id.hand_text){
-            	   mPosition = 2;
-            	   switchState();
-            	   removeRecords();
-//            	   	Log.d(DEBUG_TAG,"position "+mPosition);
-               }
+//               if(checkedId == R.id.hand_text){
+//            	   mPosition = 2;
+//            	   switchState();
+//            	   removeRecords();
+////            	   	Log.d(DEBUG_TAG,"position "+mPosition);
+//               }
 //               if(checkedId == R.id.pocket_face_up){
 //            	   mPosition = 3;
 //            	   switchState();
@@ -229,9 +229,7 @@ public class TestingActivity extends Activity implements SensorEventListener,Rad
     	   mMode = "sitting";
     	   switchState();
     	   removeRecords();
-    	   mHandButton.setSelected(true);
-    	   mPocketButton.setSelected(false);
-    	   mHandTextButton.setSelected(false);
+//    	   mHandTextButton.setSelected(false);
 //    	   Log.d(DEBUG_TAG,mMode);
        }
      

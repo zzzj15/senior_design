@@ -44,7 +44,7 @@ public class FeaturesConstructor{
 	private List<Acceleration> accelerations = new ArrayList<Acceleration>();
 	private SQLiteDatabase mDb;
 	private Context mContext;
-	private int SAMPLE_SIZE = 50; //1000 works but not many sets of data will be generated
+	private int SAMPLE_SIZE = 100; //1000 works but not many sets of data will be generated
 	private final int BIN_SIZE = 10;  
 	private Cursor mCursor;
 	private FileOutputStream outputStream;
@@ -158,8 +158,12 @@ public class FeaturesConstructor{
 	}
 	private String getName(int position,String mode){
 		//String temp = mode.substring(0, 1)+position;
-		if(mode.contains("sitting"))
-			return "still";
+		if(mode.contains("sitting")){
+			if (position ==0)
+					return "still_hand";
+			else
+				return "still_pocket";
+		}
 		else{
 			if(position==0)
 				return mode+"_hand";
@@ -209,8 +213,9 @@ public class FeaturesConstructor{
 			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
 					+" WHERE class like '%"+mode+"%' AND position = "+Position+ " AND state = "+StateNum+" ORDER BY timestamp ASC",null);
 		}
-
+		
 		if(mCursor.getCount()>0){
+			accelerations = new ArrayList<Acceleration>();
 			Log.d(DEBUG_TAG,"number of points returned from database "+mCursor.getCount());
 			mCursor.moveToFirst();
 			long timeSt=0;
@@ -332,7 +337,8 @@ public class FeaturesConstructor{
 		ArrayList<File> fileArr = new ArrayList<File>();
 		ArrayList<String> fName = new ArrayList<String>();
 		//String[] fName = new String[12];
-		int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
+		//int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
+		int[] posNum = {2,2,2};
 		for(int i=0;i<3;++i){
 			for(int j=0;j<posNum[i];++j){
 				String t = pre+filePre[i]+j+".arff";
@@ -374,7 +380,7 @@ public class FeaturesConstructor{
 			while ((sCurrentLine = br.readLine()) != null) {
 				if(sCurrentLine.equals("@attribute class string")){
 					//outputStream.write("@attribute class {running,walking,sitting}".getBytes());
-					outputStream.write("@attribute class {running_hand,running_pocket,walking_hand,walking_pocket,walking_hand_text,still}".getBytes());
+					outputStream.write("@attribute class {running_hand,running_pocket,walking_hand,walking_pocket,still_hand,still_pocket}".getBytes());
 //					outputStream.write("@attribute class {r0,r1,r2,r3,w0,w1,w2,w3,s0,s1,s2,s3}".getBytes());
 					outputStream.write("\n".getBytes());
 				}
@@ -415,11 +421,21 @@ public class FeaturesConstructor{
 			copy(src,dst);
 			File classifier =  mContext.getFileStreamPath(classifierFileName); 
 			if(!classifier.exists()){//if classifier does not exist copy from asset folder
-				FileOutputStream oStream = mContext.openFileOutput(classifierFileName, Context.MODE_PRIVATE);
-				InputStream myInput =mContext.getAssets().open(classifierFileName);
-				copyFile(myInput,oStream);
-				myInput.close();
-		        oStream.close();
+//				FileOutputStream oStream = mContext.openFileOutput(classifierFileName, Context.MODE_PRIVATE);
+//				InputStream myInput =mContext.getAssets().open(classifierFileName);
+//				copyFile(myInput,oStream);
+//				myInput.close();
+//		        oStream.close();
+				//generate classifier
+				String[] options = new String[5];
+				options[0] = "-t";
+				options[1] = mContext.getFileStreamPath("train.arff").getAbsolutePath();
+				options[2] = "-d";
+				options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
+				options[4] = "-U";
+				String result = Evaluation.evaluateModel(new J48(), options);
+				Log.d(DEBUG_TAG,result);
+		        
 			}
 			ret = evaluateResult(algo,test,fileName,classifierFileName);
 		}
@@ -458,8 +474,8 @@ public class FeaturesConstructor{
 		String[] modes = {"running","walking","sitting"};
 		File dir = mContext.getFilesDir();
 		
-		
-		int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
+		int[] posNum = {2,2,2};
+		//int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
 		for(int i=0;i<3;++i){
 			for(int j=0;j<posNum[i];++j){ //j is position
 				features = new ArrayList<Feature>();

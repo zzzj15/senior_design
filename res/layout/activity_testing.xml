@@ -36,12 +36,12 @@
          android:layout_height="wrap_content"
          android:checked="false"
          android:text="pocket" />
-     <RadioButton
-         android:id="@+id/hand_text"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:checked="false"
-         android:text="hand text" />
+<!--      <RadioButton -->
+<!--          android:id="@+id/hand_text" -->
+<!--          android:layout_width="wrap_content" -->
+<!--          android:layout_height="wrap_content" -->
+<!--          android:checked="false" -->
+<!--          android:text="hand text" /> -->
 <!--      <RadioButton -->
 <!--          android:id="@+id/pocket_face_up" -->
 <!--          android:layout_width="wrap_content" -->
