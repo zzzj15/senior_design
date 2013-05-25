@@ -720,7 +720,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 
 				int serve_size = crs.getInt(crs.getColumnIndex("Serve_Size"));
 				Serve_Size.setText("("+serve_size + " grams)");
-				mDb.close();
+				//mDb.close();
 				// showToastMessage(mlv.getItemAtPosition(position).toString());
 
 			}
