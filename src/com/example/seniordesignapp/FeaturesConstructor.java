@@ -117,8 +117,8 @@ public class FeaturesConstructor{
 			data.add(new DenseInstance(1.0, vals));
 		}
 //		data.attribute(data.numAttributes()-2).setWeight(2.0);
-//		data.attribute(4).setWeight(10); // more weight for period
-//		data.attribute(19).setWeight(10);
+		data.attribute(4).setWeight(10); // more weight for period
+		data.attribute(19).setWeight(10);
 //		data.attribute(34).setWeight(10);
 	    return data;
 	}
@@ -158,8 +158,12 @@ public class FeaturesConstructor{
 	}
 	private String getName(int position,String mode){
 		//String temp = mode.substring(0, 1)+position;
-		if(mode.contains("sitting"))
-			return mode;
+		if(mode.contains("sitting")){
+			if (position ==0)
+					return "still_hand";
+			else
+				return "still_pocket";
+		}
 		else{
 			if(position==0)
 				return mode+"_hand";
@@ -170,9 +174,36 @@ public class FeaturesConstructor{
 			else
 				return mode;
 		}
-	
 	}
-	private int retrieveSensorData(String mode,int Position) throws IOException{ //retrieve sensor data from database
+//	private int retrieveSensorData(String mode,int Position) throws IOException{ //retrieve sensor data from database
+//		int ret=0;																	//returns 1 if query result is nonempty
+//		if(mode == ""){ //retrieve all data from database, when data is not mixed
+//			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
+//					+" ORDER BY timestamp ASC",null);
+//		}
+//		else{
+//			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
+//					+" WHERE class like '%"+mode+"%' AND position = "+Position+ " ORDER BY timestamp ASC",null);
+//		}
+//
+//		if(mCursor.getCount()>0){
+//			Log.d(DEBUG_TAG,"number of points returned from database "+mCursor.getCount());
+//			mCursor.moveToFirst();
+//			long timeSt=0;
+//			long endTime = mCursor.getLong(4);
+//			while(!mCursor.isAfterLast()){
+//				timeSt = mCursor.getLong(4);
+//				accelerations.add(new Acceleration(mCursor.getFloat(1),mCursor.getFloat(2),
+//						mCursor.getFloat(3),timeSt));
+//				mCursor.moveToNext();
+//			}
+//			Log.d(DEBUG_TAG,"time interval is "+(endTime-timeSt));
+//			ret = 1;
+//		}
+//		mCursor.close();
+//		return ret;
+//	}
+	private int retrieveSensorData(String mode,int Position,int StateNum) throws IOException{ //retrieve sensor data from database
 		int ret=0;																	//returns 1 if query result is nonempty
 		if(mode == ""){ //retrieve all data from database, when data is not mixed
 			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
@@ -180,10 +211,11 @@ public class FeaturesConstructor{
 		}
 		else{
 			mCursor = mDb.rawQuery("SELECT * FROM "+DatabaseHelper.ACCELS_TABLE_NAME 
-					+" WHERE class like '%"+mode+"%' AND position = "+Position+ " ORDER BY timestamp ASC",null);
+					+" WHERE class like '%"+mode+"%' AND position = "+Position+ " AND state = "+StateNum+" ORDER BY timestamp ASC",null);
 		}
-
+		
 		if(mCursor.getCount()>0){
+			accelerations = new ArrayList<Acceleration>();
 			Log.d(DEBUG_TAG,"number of points returned from database "+mCursor.getCount());
 			mCursor.moveToFirst();
 			long timeSt=0;
@@ -218,10 +250,10 @@ public class FeaturesConstructor{
 		String currentDateandTime = dateFormat.format(new Date());
 		return currentDateandTime;
 	}
-	private void evaluateResult(boolean algo,boolean test,String fileName,String classifierFileName) throws Exception{
+	private String evaluateResult(boolean algo,boolean test,String fileName,String classifierFileName) throws Exception{
 		/* generate classifier*/
 		String currentDateandTime = getCurrentTime();
-		
+		String result;
 		if(test==false){
 			FileOutputStream oStream = mContext.openFileOutput("training_log_"+currentDateandTime, Context.MODE_PRIVATE);
 			Log.d(DEBUG_TAG,"Training!");
@@ -237,7 +269,7 @@ public class FeaturesConstructor{
 				options[2] = "-d";
 				options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
 				options[4] = "-U";
-				String result = Evaluation.evaluateModel(new J48(), options);
+				result = Evaluation.evaluateModel(new J48(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
 			}
@@ -247,7 +279,7 @@ public class FeaturesConstructor{
 				options[1] = mContext.getFileStreamPath(fileName).getAbsolutePath();
 				options[2] = "-d";
 				options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
-				String result = Evaluation.evaluateModel(new NaiveBayes(), options);
+				result = Evaluation.evaluateModel(new NaiveBayes(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
 			}
@@ -262,7 +294,7 @@ public class FeaturesConstructor{
 				options[1] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
 				options[2] = "-T";
 				options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
-				String result = Evaluation.evaluateModel(new J48(), options);
+				result = Evaluation.evaluateModel(new J48(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
 			}
@@ -273,7 +305,7 @@ public class FeaturesConstructor{
 				options[2] = "-T";
 				options[3] = mContext.getFileStreamPath(fileName).getAbsolutePath();
 				options[4] = "-o";
-				String result = Evaluation.evaluateModel(new NaiveBayes(), options);
+				result = Evaluation.evaluateModel(new NaiveBayes(), options);
 				Log.d(DEBUG_TAG,result);
 				oStream.write(result.getBytes());
 			}
@@ -293,9 +325,11 @@ public class FeaturesConstructor{
 		}
 			
 		copy(src,dst);
+		return result;
 	}
-	private void constructFinalFile(boolean algo,boolean test ) throws Exception{
+	private String constructFinalFile(boolean algo,boolean test ) throws Exception{
 		
+		String ret;
 		String pre = getPre(test); //decide the prefix for the output file
 		
 		//File[] fileArr = new File[12];
@@ -303,7 +337,8 @@ public class FeaturesConstructor{
 		ArrayList<File> fileArr = new ArrayList<File>();
 		ArrayList<String> fName = new ArrayList<String>();
 		//String[] fName = new String[12];
-		int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
+		//int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
+		int[] posNum = {2,2,2};
 		for(int i=0;i<3;++i){
 			for(int j=0;j<posNum[i];++j){
 				String t = pre+filePre[i]+j+".arff";
@@ -345,7 +380,7 @@ public class FeaturesConstructor{
 			while ((sCurrentLine = br.readLine()) != null) {
 				if(sCurrentLine.equals("@attribute class string")){
 					//outputStream.write("@attribute class {running,walking,sitting}".getBytes());
-					outputStream.write("@attribute class {running_hand,running_pocket,walking_hand,walking_pocket,walking_hand_text,sitting}".getBytes());
+					outputStream.write("@attribute class {running_hand,running_pocket,walking_hand,walking_pocket,still_hand,still_pocket}".getBytes());
 //					outputStream.write("@attribute class {r0,r1,r2,r3,w0,w1,w2,w3,s0,s1,s2,s3}".getBytes());
 					outputStream.write("\n".getBytes());
 				}
@@ -386,15 +421,27 @@ public class FeaturesConstructor{
 			copy(src,dst);
 			File classifier =  mContext.getFileStreamPath(classifierFileName); 
 			if(!classifier.exists()){//if classifier does not exist copy from asset folder
-				FileOutputStream oStream = mContext.openFileOutput(classifierFileName, Context.MODE_PRIVATE);
-				InputStream myInput =mContext.getAssets().open(classifierFileName);
-				copyFile(myInput,oStream);
-				myInput.close();
-		        oStream.close();
+//				FileOutputStream oStream = mContext.openFileOutput(classifierFileName, Context.MODE_PRIVATE);
+//				InputStream myInput =mContext.getAssets().open(classifierFileName);
+//				copyFile(myInput,oStream);
+//				myInput.close();
+//		        oStream.close();
+				//generate classifier
+				String[] options = new String[5];
+				options[0] = "-t";
+				options[1] = mContext.getFileStreamPath("train.arff").getAbsolutePath();
+				options[2] = "-d";
+				options[3] = mContext.getFileStreamPath(classifierFileName).getAbsolutePath();
+				options[4] = "-U";
+				String result = Evaluation.evaluateModel(new J48(), options);
+				Log.d(DEBUG_TAG,result);
+		        
 			}
-			evaluateResult(algo,test,fileName,classifierFileName);
+			ret = evaluateResult(algo,test,fileName,classifierFileName);
 		}
-		
+		else
+			ret = "No Test Results";
+		return ret;
 	}
 	private void createFoldersonSD(){
 		createFolderonSD("seniordesigndata");
@@ -407,7 +454,7 @@ public class FeaturesConstructor{
 		outputStream = mContext.openFileOutput(pre+mode.substring(0,1)+position+".arff", Context.MODE_PRIVATE);
 		
 		/* Get the just-recorded accelerations from db and construct a feature from every 200 datapoints*/
-		retrieveSensorData("",0); //retrieve all data from database
+		retrieveSensorData("",0,0); //retrieve all data from database
 		for (int i =0;i<accelerations.size()/SAMPLE_SIZE;i++){
 			List<Acceleration> samples = accelerations.subList(i*SAMPLE_SIZE, SAMPLE_SIZE*(i+1)-1);
 			features.add(new Feature(samples));
@@ -422,23 +469,31 @@ public class FeaturesConstructor{
 		mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
 		mDb.close();
 	}
-	public void constructTestFeature(boolean algo) throws Exception{
+	public String constructTestFeature(boolean algo,int numStates) throws Exception{
 		createFoldersonSD();
 		String[] modes = {"running","walking","sitting"};
 		File dir = mContext.getFilesDir();
 		
-		
-		int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
-		
+		int[] posNum = {2,2,2};
+		//int[] posNum = {2,3,1}; //2 positions for running, 3 positions for walking, 1 position for still
 		for(int i=0;i<3;++i){
 			for(int j=0;j<posNum[i];++j){ //j is position
-				int isNotEmpty = retrieveSensorData(modes[i],j);//look for all activities in all positions if any data was saved from the database
-				if(isNotEmpty==1){
-					outputStream = mContext.openFileOutput("test_"+modes[i].substring(0,1)+j+".arff", Context.MODE_PRIVATE);
-					for (int k =0;k<accelerations.size()/SAMPLE_SIZE;k++){
-						List<Acceleration> samples = accelerations.subList(k*SAMPLE_SIZE, SAMPLE_SIZE*(k+1)-1);
-						features.add(new Feature(samples));
+				features = new ArrayList<Feature>();
+				boolean toDelete = true;
+				int isNotEmpty;
+				outputStream = mContext.openFileOutput("test_"+modes[i].substring(0,1)+j+".arff", Context.MODE_PRIVATE);
+				for(int k=0;k<=numStates;++k){
+					isNotEmpty = retrieveSensorData(modes[i],j,k);//look for all activities in all positions if any data was saved from the database
+					if(isNotEmpty==1){
+						Log.d(DEBUG_TAG,"state is"+ k);
+						toDelete = false;
+						for (int kk =0;kk<accelerations.size()/SAMPLE_SIZE;kk++){
+							List<Acceleration> samples = accelerations.subList(kk*SAMPLE_SIZE, SAMPLE_SIZE*(kk+1)-1);
+							features.add(new Feature(samples));
+						}
 					}
+				}
+				if(toDelete==false){
 					Instances data = constructInstances(features,modes[i],true,j);
 					outputStream.write(data.toString().getBytes());
 					outputStream.close();
@@ -451,10 +506,32 @@ public class FeaturesConstructor{
 				}
 			}
 		}
-		constructFinalFile(algo, true); //true - J48, test is true
+//		for(int i=0;i<3;++i){
+//			for(int j=0;j<posNum[i];++j){ //j is position
+//				int isNotEmpty = retrieveSensorData(modes[i],j);//look for all activities in all positions if any data was saved from the database
+//				if(isNotEmpty==1){
+//					outputStream = mContext.openFileOutput("test_"+modes[i].substring(0,1)+j+".arff", Context.MODE_PRIVATE);
+//					for (int k =0;k<accelerations.size()/SAMPLE_SIZE;k++){
+//						List<Acceleration> samples = accelerations.subList(k*SAMPLE_SIZE, SAMPLE_SIZE*(k+1)-1);
+//						features.add(new Feature(samples));
+//					}
+//					Instances data = constructInstances(features,modes[i],true,j);
+//					outputStream.write(data.toString().getBytes());
+//					outputStream.close();
+//				}
+//				else{ // delete files not used in this calibration
+//					File file = new File(dir, "test_"+modes[i].substring(0,1)+j+".arff");
+//					boolean deleted = file.delete();
+//					if(deleted)
+//						Log.d(DEBUG_TAG,"deleted"+file.getAbsolutePath().toString());
+//				}
+//			}
+//		}
+		String ret = constructFinalFile(algo, true); //true - J48, test is true
 		/* We don't need the data for calibration*/
 		mDb.execSQL("DROP TABLE " + DatabaseHelper.ACCELS_TABLE_NAME);
 		mDb.execSQL(DatabaseHelper.ACCELS_STRING_CREATE);
 		mDb.close();
+		return ret;
 	}
 }
