@@ -407,9 +407,9 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 			lat = gps.getLatitude();
 			lon = gps.getLongitude();
 			// \n is for new line
-			Toast.makeText(getActivity(),
+			/*Toast.makeText(getActivity(),
 					"Your Location is - \nLat: " + lat + "\nLong: " + lon,
-					Toast.LENGTH_LONG).show();
+					Toast.LENGTH_LONG).show();*/
 		} else {
 			// can't get location
 			// GPS or Network is not enabled
@@ -441,7 +441,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 			value.put("distance", tmpdis);
 			mDb.update("FoodGPS", value, null, null);
 			}
-		showToastMessage("Got " + tmplat + "\n& " + tmplong +"\ndistance is" + tmpdis);
+		//showToastMessage("Got " + tmplat + "\n& " + tmplong +"\ndistance is" + tmpdis);
 		}
 		
 		// Display on the list
@@ -586,11 +586,11 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 		          				 spin_amount.setSelection(0);
 		          				 mEdtText.setText("");
 		          				 isValid=false;
-		          				 showToastMessage("Recorded "+spinner_pos+" "+fName);
-		          				 Toast.makeText(getActivity(), "DB has recorded:\n" + name + " at\nLongitude = " + tmplon +"\nLatitude = " + tmplat
+		          				 //showToastMessage("Recorded "+spinner_pos+" "+fName);
+		          				/* Toast.makeText(getActivity(), "DB has recorded:\n" + name + " at\nLongitude = " + tmplon +"\nLatitude = " + tmplat
 		          						 + "\nTime: " + tmptime + "\nTesting Input Type: " + inputMethod
 		          						 + "\nTesting Time Taken: " + ((timeStop - timeStart)/1000 ) + " sec",Toast.LENGTH_LONG).show();
-							}
+							*/}
 							
 						});
 
@@ -720,7 +720,7 @@ public class FoodTrackingFragment extends Fragment implements AdapterView.OnItem
 
 				int serve_size = crs.getInt(crs.getColumnIndex("Serve_Size"));
 				Serve_Size.setText("("+serve_size + " grams)");
-				mDb.close();
+				//mDb.close();
 				// showToastMessage(mlv.getItemAtPosition(position).toString());
 
 			}
