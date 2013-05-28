@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -49,7 +50,10 @@ public class HomePageFragment extends Fragment {
     private Cursor mCursor;
     private static String TAG = "HomePageFramentDynamicLog";
     ProgressBar GLprogressBar;
-    final int GL_LIMIT = 70; //Scale to 70% as it is 100%
+    final double GL_LIMIT = 100; 
+    final double GL_SCALE = 70; //Scale to 70% as it is 100%
+    TextView leftoverGL;
+    TextView recomendations;
 
 	//Testing String timeStamp;
 	private String[] groups;
@@ -249,7 +253,7 @@ public class HomePageFragment extends Fragment {
 
 		public ShowCustomProgressBarAsyncTask(int GL, int limit) {
 			currentGL = GL;
-			limitGL = limit;
+			limitGL = limit ;
 		}
 
 		@Override
@@ -276,14 +280,24 @@ public class HomePageFragment extends Fragment {
 
 		@Override
 		protected void onProgressUpdate(Integer... values) {
-			if (currentGL <= limitGL) {
-				GLprogressBar.setProgress(values[0]);
-			} else if ((currentGL >= limitGL) && (currentGL < 100)) {
+
+			if (currentGL  <= limitGL ) {
+				GLprogressBar.setProgress((int) (values[0]* GL_SCALE / 100));
+				leftoverGL.setText("+" + (int) (GL_LIMIT - values[0]));
+				leftoverGL.setTextColor(Color.parseColor("#FF58A03D"));
+
+			} else if ((currentGL  >= limitGL ) && (currentGL < limitGL/GL_SCALE * 100)) {
 				GLprogressBar.setProgress(0);
-				GLprogressBar.setSecondaryProgress(values[0]);
+				GLprogressBar.setSecondaryProgress((int) (values[0]* GL_SCALE / 100));
+				leftoverGL.setText("-" + (int) Math.abs(values[0] - GL_LIMIT));
+				leftoverGL.setTextColor(Color.parseColor("#FFCD0102"));
+
 			} else {
 				GLprogressBar.setProgress(0);
 				GLprogressBar.setSecondaryProgress(100);
+				leftoverGL.setText("-" + (int) Math.abs(values[0] - GL_LIMIT));
+				leftoverGL.setTextColor(Color.parseColor("#FFCD0102"));
+
 			}
 		}
 	}
@@ -307,7 +321,7 @@ public class HomePageFragment extends Fragment {
 		LinearLayout mlinearLayout = (LinearLayout) inflater.inflate(
 				R.layout.activity_home_page, container, false);
 		
-		mlinearLayout.setOnTouchListener(new OnTouchListener() {
+/*		mlinearLayout.setOnTouchListener(new OnTouchListener() {
 			
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -318,9 +332,9 @@ public class HomePageFragment extends Fragment {
 			    }
 				return false;
 			}
-		});
+		});*/
 		
-		
+		leftoverGL = (TextView) mlinearLayout.findViewById(R.id.leftoverGL);
 		TotalGL = (TextView) mlinearLayout.findViewById(R.id.textView2);	
 	//String tempGl=mCursor.getString(mCursor.getColumnIndex("GPS_time"));
 		String sql = "SELECT SUM(GL) AS TotalGL FROM foodGPS";
@@ -329,8 +343,9 @@ public class HomePageFragment extends Fragment {
 		mCursor = mDb.rawQuery(sql,null);
 		mCursor.moveToFirst();	
 		String tempGl=mCursor.getString(mCursor.getColumnIndex("TotalGL"));
-		if (tempGl == null)
+		if (tempGl == null) {
 			TotalGL.setText("0");
+			leftoverGL.setText(""+ (int) GL_LIMIT); }
 		else
 			TotalGL.setText(tempGl);
 		//TotalGL.setTextColor(-16711681);
@@ -361,6 +376,7 @@ public class HomePageFragment extends Fragment {
 			}
 		});
 		
+		
 		GLprogressBar = (ProgressBar) mlinearLayout.findViewById(R.id.GLprogressBar);
 		GLcheck = (ImageView) mlinearLayout.findViewById(R.id.gl_check);
 		int anything;
@@ -373,7 +389,7 @@ public class HomePageFragment extends Fragment {
 		else {
 		 anything = Integer.parseInt(tempGl);
 		 //GLprogressBar.setProgress(Integer.parseInt(tempGl));
-		 new ShowCustomProgressBarAsyncTask(Integer.parseInt(tempGl),GL_LIMIT).execute(); 
+		 new ShowCustomProgressBarAsyncTask(Integer.parseInt(tempGl), (int) GL_LIMIT).execute(); 
 			if ( anything > GL_LIMIT ){
 				GLcheck.setImageResource(R.drawable.ic_delete);
 			}

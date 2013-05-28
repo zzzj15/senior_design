@@ -164,6 +164,27 @@
             android:text="Tips:"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="#385798" />
+        <TextView
+            android:id="@+id/recomendations"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/arrow_up"
+            android:layout_below="@+id/Tips"
+            android:layout_marginLeft="15dp"
+            android:text="Eat well"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#385798" />
+        <TextView
+            android:id="@+id/leftoverGL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/arrow_up_layout"
+            android:layout_below="@+id/GLprogressBar"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="5dp"
+            android:text="100"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#FF58A03D" />
     </RelativeLayout>
 
     <ImageView
