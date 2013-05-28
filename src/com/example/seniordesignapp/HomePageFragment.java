@@ -53,8 +53,9 @@ public class HomePageFragment extends Fragment {
     final double GL_LIMIT = 100; 
     final double GL_SCALE = 70; //Scale to 70% as it is 100%
     TextView leftoverGL;
-    TextView recomendations;
-
+    TextView recommendations;
+    private ArrayList<String> tips = new ArrayList<String>();
+    
 	//Testing String timeStamp;
 	private String[] groups;
 	private Button refreshButton;
@@ -301,6 +302,9 @@ public class HomePageFragment extends Fragment {
 			}
 		}
 	}
+	
+
+	
 
 	Gauge meter; 
 	//Button add;
@@ -335,7 +339,9 @@ public class HomePageFragment extends Fragment {
 		});*/
 		
 		leftoverGL = (TextView) mlinearLayout.findViewById(R.id.leftoverGL);
-		TotalGL = (TextView) mlinearLayout.findViewById(R.id.textView2);	
+		TotalGL = (TextView) mlinearLayout.findViewById(R.id.textView2);
+		recommendations = (TextView) mlinearLayout.findViewById(R.id.recomendations);
+		
 	//String tempGl=mCursor.getString(mCursor.getColumnIndex("GPS_time"));
 		String sql = "SELECT SUM(GL) AS TotalGL FROM foodGPS";
 		mDbHelper = new DatabaseHelper(getActivity());
@@ -397,7 +403,7 @@ public class HomePageFragment extends Fragment {
 				GLcheck.setImageResource(R.drawable.btn_check_buttonless_on);
 		}
 		
-		
+
 		
 		lv = (ExpandableListView) mlinearLayout.findViewById(R.id.log_list);
 		MyExpandableListAdapter expandableAdapter = new MyExpandableListAdapter();
@@ -408,7 +414,7 @@ public class HomePageFragment extends Fragment {
 			@Override
 			public boolean onChildClick(ExpandableListView parent, View v,
 					int groupPosition, int childPosition, long id) {
-				showToastMessage("Work! + ParentID =" + groupPosition + " ChildID = " + childPosition );
+				//showToastMessage("Work! + ParentID =" + groupPosition + " ChildID = " + childPosition );
 				
 				
 		        //We need to get the instance of the LayoutInflater, use the context of this activity
