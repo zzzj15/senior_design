@@ -352,11 +352,11 @@ public class HomePageFragment extends Fragment {
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
 
-				// if(isChecked){
-				// tvStateofToggleButton.setText("ON");
-				// }else{
-				// tvStateofToggleButton.setText("OFF");
-				// }
+				 if(isChecked){
+					 getActivity().startService(new Intent(getActivity(),AccelsService.class));
+				 }else{
+					 getActivity().stopService(new Intent(getActivity(),AccelsService.class));
+				 }
 
 			}
 		});
